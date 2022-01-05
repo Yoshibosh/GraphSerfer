@@ -13,6 +13,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -52,7 +54,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
     Map<String,Double> XYmaxesAndMines = new HashMap<>();
 
 
-    String funcWeDo = "";
+    ArrayList<String> funcsWeDo = new ArrayList<>();
+    int funcCount = 0;
     boolean isClickAlready;
 
     //Цена деления
@@ -65,12 +68,14 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
     ArrayList<TouchForMove> scaleTouches = new ArrayList<>();
 
     boolean isAfter2MultiTouches = false;
+    boolean is2TouchNow = false;
+    PointF CentreOf2Touches = new PointF();
+    boolean isFirst2Touch = false;
 
     boolean rightMove = true;
     boolean upMove = true;
-    boolean scaleMoves = false;
 
-    ArrayList<FormulSistem.Pair<Double,Double>> calculetblePoints = null;
+    HashMap<String,ArrayList<FormulSistem.Pair<Double,Double>>> allCalculetblePoints = new HashMap<>();
 
     int touchCounter = 0;
 
@@ -130,6 +135,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             // число касаний
             int pointerCount = event.getPointerCount();
 
+            is2TouchNow = pointerCount == 2;
+
             Log.i("JopaTouch","{" + pointerCount + ", " + pointerIndex + "}");
 
             float xDiff = 0;
@@ -145,6 +152,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                 case MotionEvent.ACTION_POINTER_DOWN: // последующие касания
                     Log.i("TouchEvent2","Index = " + event.getActionIndex() + "X = " + event.getX() + "Y = " + event.getY() + "ass = ");
                     scaleTouches.add(new TouchForMove(event.getPointerId(pointerIndex),event.getX(pointerIndex),event.getY(pointerIndex),xMax,yMax,xMin,yMin));
+                    isFirst2Touch = !(pointerCount == 2);
                     break;
 
                 case MotionEvent.ACTION_UP: // прерывание последнего касания
@@ -206,8 +214,12 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                         scaleTouches.get(1).lastXMovePos =  event.getX(1);
                         scaleTouches.get(1).lastYMovePos =  event.getY(1);
 
-                        scaleMoves = true;
+                        if (!isFirst2Touch){
+                            CentreOf2Touches.x = (event.getX(0) + event.getX(1))/2;
+                            CentreOf2Touches.y = (event.getY(0) + event.getY(1))/2;
+                        }
 
+                        isFirst2Touch = true;
                         constraintLayout.removeView(drawView);
                         constraintLayout.addView(drawView,constraintLayout.getLayoutParams());
                     }
@@ -250,8 +262,12 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             public void onClick(View v) {
                 constraintLayout.removeView(drawView);
 
-                funcWeDo = FormulaInput.getText().toString();
-                calculetblePoints = null;
+                funcCount = 1;
+                funcsWeDo.clear();
+                funcsWeDo.add(FormulaInput.getText().toString());
+
+                allCalculetblePoints.clear();
+                allCalculetblePoints.put(FormulaInput.getText().toString(),null);
 
                 constraintLayout.addView(drawView,constraintLayout.getLayoutParams());
             }
@@ -380,13 +396,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             //Центры координатных осей относительно сторон экрана
             double xCentre = ( - xMin/(xMax - xMin))*width;
             double yCentre = (yMax/(yMax - yMin))*height;
-            double xRealCentre = xCentre;
-            double yRealCentre = yCentre;
-
-            if (xMax < 0){xRealCentre = width;}
-            if (xMin > 0){xRealCentre = 0;}
-            if (yMax < 0){yRealCentre = 0;}
-            if (yMin > 0){yRealCentre = height;}
+            double xRealCentre = width/2;
+            double yRealCentre = height/2;
 
             //Кол-во делений на коорд сетке
             int kx = (int) ((xMax - xMin)/Cx);
@@ -424,13 +435,29 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             double Korrektirovka;
             double extraX = 0;
 
-            if (xRealCentre == 0){
-                count = DrobAndCelayaChast(xMin/Cx).first*Cx + Cx;
 
-                extraX = (1 - DrobAndCelayaChast(xMin/Cx).second)*Cex;
-                Log.i("DROB","" + DrobAndCelayaChast(xMin/Cx).first);
+            if (is2TouchNow){
+//                xRealCentre = DrobAndCelayaChast(CentreOf2Touches.x/Cex).first*Cex;
+//                yRealCentre = DrobAndCelayaChast(CentreOf2Touches.y/Cey).first*Cey;
+//
+//                count = DrobAndCelayaChast((CentreOf2Touches.x*kx/width)/Cx).first*Cx - Cx;
+//
+//                extraX = (DrobAndCelayaChast((CentreOf2Touches.x/Cex)).second)*Cex;
+
+                xRealCentre = CentreOf2Touches.x;
+                yRealCentre = CentreOf2Touches.y;
             }
-            for (double x = xRealCentre + extraX;x < width + Cex;x += (Cex)){
+            Log.i("FuckLohov","1 = " + DrobAndCelayaChast((CentreOf2Touches.x*kx/width)/Cx).first*Cx+ "\t2 = " + CentreOf2Touches.x*kx/width);
+
+//            if (xRealCentre == 0){
+//                count = DrobAndCelayaChast(xMin/Cx).first*Cx + Cx;
+//
+//                extraX = (DrobAndCelayaChast(xMin/Cx).second)*Cex;
+//                Log.i("DROB","" + DrobAndCelayaChast(xMin/Cx).first);
+//            }
+            count = xMin;
+            double extra = (1 - DrobAndCelayaChast(Math.abs(xMin/Cx)).second)*Cex;
+            for (double x = 0 + extra;x < xRealCentre;x += Cex){
 
 
                 p.setAlpha(100);
@@ -439,46 +466,47 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
 
                 p.setStyle(Paint.Style.FILL);
-                Korrektirovka = 0;
-
-
-                if (xRealCentre != 0){
-//                    if(x + Cex > width){Korrektirovka = -Cex*0.1;}
-//                    if(x == xRealCentre){Korrektirovka = Cex*0.1;}
-                }
-                canvas.drawText(String.format("%." + decimalPlacesX +"f",count), (float)(x + Korrektirovka), (float) yCentre, p);
+                canvas.drawText(String.format("%." + decimalPlacesX +"f",count), (float)(x), (float) yCentre, p);
                 count += Cx;
                 p.setStyle(Paint.Style.STROKE);
-//                canvas.drawText(String.format(,String.valueOf(x / Cex - xCentre / width)), (float)x, (float) yCentre, p);
             }
+
 
             extraX = 0;
-            count = 0;
-            if (xRealCentre == 0){extraX = -Cex;}
-            if (xRealCentre == width){
-                count = DrobAndCelayaChast( xMax/Cx).first*Cx - Cx;
-
-                extraX = (DrobAndCelayaChast(xMax/Cx).second)*Cex;
-                Log.i("DROB","" + DrobAndCelayaChast(xMin/Cx).first);
-            }
-            for (double x = xRealCentre + extraX;x > (0 - Cex);x -= Cex){
+//            if (is2TouchNow){
+//                count = DrobAndCelayaChast((CentreOf2Touches.x*kx/width)/Cx).first*Cx - Cx;
+//
+//                extraX = (DrobAndCelayaChast((CentreOf2Touches.x*kx/width)/Cx).second)*Cex;
+//            }
+//            if (xRealCentre == 0){extraX = -Cex;}
+//            if (xRealCentre == width){
+//                count = DrobAndCelayaChast( xMax/Cx).first*Cx - Cx;
+//
+//                extraX = (DrobAndCelayaChast(xMax/Cx).second)*Cex;
+//                Log.i("DROB","" + DrobAndCelayaChast(xMin/Cx).first);
+//            }
+            count = xMax;
+            extra = (DrobAndCelayaChast(Math.abs(xMax/Cx)).second)*Cex;
+            for (double x = width - extra;x > xRealCentre;x -= Cex){
 
                 p.setAlpha(100);
                 canvas.drawLine((float)x,0,(float)x,(float)height,p);
                 p.setAlpha(255);
 
                 p.setStyle(Paint.Style.FILL);
-                Korrektirovka = 0;
-//                if(x - Cex < 0){Korrektirovka = Cex*0.1;}
-//                if(x == (xRealCentre - Cex)){Korrektirovka = -Cex*0.1;}
-                canvas.drawText(String.format("%." + decimalPlacesX +"f",count), (float)(x + Korrektirovka), (float) yCentre, p);
+//                p.setStrokeWidth(5);
+                canvas.drawText(String.format("%." + decimalPlacesX +"f",count), (float)(x), (float) yCentre, p);
                 count -= Cx;
                 p.setStyle(Paint.Style.STROKE);
-//                canvas.drawText(String.format(,String.valueOf(x / Cex - xCentre / width)), (float)x, (float) yCentre, p);
             }
 
             double extraY = 0;
             count = -Cy;
+            if (is2TouchNow){
+                count = DrobAndCelayaChast((CentreOf2Touches.y*ky/height)/Cy).first*Cy;
+
+                extraY = Cey;
+            }
             if (yRealCentre == 0){
                 count = DrobAndCelayaChast(yMax/Cy).first*Cy - Cy;
 
@@ -499,6 +527,10 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                 p.setStyle(Paint.Style.STROKE);
             }
             count = Cy;
+            if (is2TouchNow){
+                count = DrobAndCelayaChast((CentreOf2Touches.y*ky/height)/Cy).first*Cy;
+                extraY = 0;
+            }
             if (yRealCentre == height){
                 count = DrobAndCelayaChast(yMin/Cy).first*Cy + Cy;
 
@@ -525,35 +557,47 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             //Строиться с точностью до 0.01*ЦенаДеления
             step = 0.005*Cx;
 
-
+            Log.i("AssCum","" + funcsWeDo.size());
+            Log.i("AssCum","" + allCalculetblePoints.size());
             double fromx = xMin;
             double tox = xMax;
             try {
 
+                for (String func : funcsWeDo){
 
-                if (calculetblePoints != null) {
+                    ArrayList<FormulSistem.Pair<Double,Double>> calculetblePoints = allCalculetblePoints.get(func);
 
-                    if (calculetblePoints.size() != 0 ) {
-                        fromx = calculetblePoints.get(calculetblePoints.size() - 1).element1;
+                    Log.i("Nigger","" + func);
 
-                        while (calculetblePoints.get(0).element1 < xMin) {
-                            calculetblePoints.remove(0);
+                    if (calculetblePoints != null) {
+
+                        if (calculetblePoints.size() != 0 ) {
+                            fromx = calculetblePoints.get(calculetblePoints.size() - 1).element1;
+
+                            while (calculetblePoints.get(0).element1 < xMin) {
+                                calculetblePoints.remove(0);
+                            }
+
+                            calculetblePoints.addAll(FormulSistem.Calculate(func, fromx, tox, step));
+
+                            fromx = xMin;
+                            tox = calculetblePoints.get(0).element1;
+
+                            for (int i = calculetblePoints.size() - 1; calculetblePoints.get(i).element1 > xMax; i--) {
+                                calculetblePoints.remove(i);
+                            }
+
+                            calculetblePoints.addAll(0, FormulSistem.Calculate(func, fromx, tox, step));
+                        }else{
+                            calculetblePoints = FormulSistem.Calculate(func, xMin, xMax, step);
                         }
-
-                        calculetblePoints.addAll(FormulSistem.Calculate(funcWeDo, fromx, tox, step));
-
-                        fromx = xMin;
-                        tox = calculetblePoints.get(0).element1;
-
-                        for (int i = calculetblePoints.size() - 1; calculetblePoints.get(i).element1 > xMax; i--) {
-                            calculetblePoints.remove(i);
-                        }
-
-                        calculetblePoints.addAll(0, FormulSistem.Calculate(funcWeDo, fromx, tox, step));
+                    }else {
+                        calculetblePoints = FormulSistem.Calculate(func, xMin, xMax, step);
                     }
-                }else {
-                    calculetblePoints = FormulSistem.Calculate(funcWeDo, xMin, xMax, step);
+                    allCalculetblePoints.remove(func);
+                    allCalculetblePoints.put(func,calculetblePoints);
                 }
+
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -561,44 +605,39 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
 
 
-            @SuppressLint("DrawAllocation") Path path = new Path();
+            @SuppressLint("DrawAllocation") ArrayList<Path> paths = new ArrayList<>(funcCount);
+
             int qweoipcj = 0;
-            if (calculetblePoints != null){
-                for (int i = 0; i < calculetblePoints.size();i++){
-//
-                    if (calculetblePoints.get(i).element2.isNaN()){qweoipcj = i; continue;}
-                    if (calculetblePoints.get(i).element2.isInfinite()){
-                        Log.i("SEX","TRAAAAAAAAAAH");
-                        float asscum;
-                        if (calculetblePoints.get(i).element2 > 0){
-                            asscum = -10000.0f;
-                        }else{
-                            asscum = 10000.0f;
+            for (int pathCount = 0;pathCount < funcCount; pathCount++){
+                @SuppressLint("DrawAllocation") Path path = new Path();
+                ArrayList<FormulSistem.Pair<Double,Double>> calculetblePoints = allCalculetblePoints.get(funcsWeDo.get(pathCount));
+
+                if (calculetblePoints != null){
+                    for (int i = 0; i < calculetblePoints.size();i++){
+
+                        if (calculetblePoints.get(i).element2.isNaN()){qweoipcj = i + 1; continue;}
+                        if (calculetblePoints.get(i).element2.isInfinite()){
+                            Log.i("SEX","TRAAAAAAAAAAH");
+                            float asscum;
+                            if (calculetblePoints.get(i).element2 > 0){
+                                asscum = -10000.0f;
+                            }else{
+                                asscum = 10000.0f;
+                            }
+                            path.moveTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,asscum );
+                            qweoipcj = i;
+                            continue;
                         }
-                        path.moveTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,asscum );
-                        qweoipcj = i;
-                        continue;
+
+                        if (i <= qweoipcj){path.rMoveTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,(float)-calculetblePoints.get(i).element2*(float)yMult + (float)yCentre);}
+                        path.lineTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,(float)-calculetblePoints.get(i).element2*(float)yMult + (float)yCentre);
+
                     }
-
-                    if (i <= qweoipcj){path.rMoveTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,(float)-calculetblePoints.get(i).element2*(float)yMult + (float)yCentre);}
-                    path.lineTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,(float)-calculetblePoints.get(i).element2*(float)yMult + (float)yCentre);
-
                 }
+                Log.i("ass",path.toString());
+                paths.add(path);
             }
 
-
-            float[] pointsf = new float[points.size()];
-            Number[] jopa = new Number[points.size()];
-            for (int i = 0;i < points.size();i++){
-                jopa[i] = points.get(i);
-                pointsf[i] = (jopa[i] != null ? jopa[i].floatValue() : Float.NaN);
-            }
-//
-//            canvas.drawLine(100,100,500,500,p);
-            String s = "";
-            for (float f : pointsf){
-                s += f + " | ";
-            }
 //            Log.i("assHole",s);
             Log.i("CenaDel","[Cx " + Cx + "|Cy " + Cy + "|Cex " + Cex + "|Cey " + Cey + ']');
 //            Log.i("Mult","[" + xMult + '|' + yMult + ']');
@@ -608,7 +647,11 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             p.setStrokeWidth(3);
             p.setAntiAlias(true);
             p.setStyle(Paint.Style.STROKE);
-            canvas.drawPath(path,p);
+
+            for (Path path : paths){
+                canvas.drawPath(path,p);
+            }
+
             p.setStyle(Paint.Style.STROKE);
 //            canvas.drawLines(pointsf,p);
 
