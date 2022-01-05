@@ -115,202 +115,9 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         XYmaxesAndMines.put("yMin",yMin);
         XYmaxesAndMines.put("yMax",yMax);
 
-
-        Button cos = findViewById(R.id.cos);
-        cos.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                funcWeDo = cos.getText().toString();
-            }
-        });
-        Button sin = findViewById(R.id.sin);
-        sin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                funcWeDo = sin.getText().toString();
-            }
-        });
-        Button exp = findViewById(R.id.exp);
-        exp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                funcWeDo = exp.getText().toString();
-            }
-        });
-        Button pow = findViewById(R.id.pow);
-        pow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                funcWeDo = pow.getText().toString();
-            }
-        });
         Button build = findViewById(R.id.build);
-
-        //Присваивание переменным обьекты View, которые находятся в файле разметки activity_main2.xml ,
-        // для дальнейшего взаимодействия с ними(Класс родитель их всех - View).
-        EditText XmaxEditText = findViewById(R.id.Xmax);
-        EditText XminEditText = findViewById(R.id.Xmin);
-        EditText YmaxEditText = findViewById(R.id.Ymax);
-        EditText YminEditText = findViewById(R.id.Ymin);
-
-        TextView XmaxTextView = findViewById(R.id.xmaxView);
-        TextView XminTextView = findViewById(R.id.xminView);
-        TextView YmaxTextView = findViewById(R.id.ymaxView);
-        TextView YminTextView = findViewById(R.id.yminView);
-
-        EditText CenaDelXEdit = findViewById(R.id.CenaDelXEdit);
-        EditText CenaDelYEdit = findViewById(R.id.CenaDelYEdit);
-        TextView CenaDelXView = findViewById(R.id.CenaDelX);
-        TextView CenaDelYView = findViewById(R.id.CenaDelY);
-
-        SeekBar seekBarXP = findViewById(R.id.seekBarXP);
-        SeekBar seekBarYP = findViewById(R.id.seekBarYP);
-        SeekBar seekBarXN = findViewById(R.id.seekBarXN);
-        SeekBar seekBarYN = findViewById(R.id.seekBarYN);
-        seekBarXP.setMax(10);
-        seekBarXN.setMax(10);
-        seekBarYP.setMax(10);
-        seekBarYN.setMax(10);
-        ColorDrawable white = new ColorDrawable(getResources().getColor(R.color.black));
-        white.setAlpha(255);
-        seekBarXN.setBackground(white);
-        seekBarXP.setBackground(white);
-        seekBarYN.setBackground(white);
-        seekBarYP.setBackground(white);
-        seekBarXP.setAlpha(1);
-        seekBarXN.setAlpha(1);
-        seekBarYP.setAlpha(1);
-        seekBarYN.setAlpha(1);
-
         EditText FormulaInput = findViewById(R.id.FormulaInput);
 
-
-
-        //        seekBarXP.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//            @Override
-//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-//
-//            }
-//
-//            @Override
-//            public void onStartTrackingTouch(SeekBar seekBar) {
-//
-//            }
-//
-//            @Override
-//            public void onStopTrackingTouch(SeekBar seekBar) {
-//                xMax = seekBar.getProgress();
-//            }
-//        });
-//        seekBarXN.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//            @Override
-//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-//
-//            }
-//
-//            @Override
-//            public void onStartTrackingTouch(SeekBar seekBar) {
-//
-//            }
-//
-//            @Override
-//            public void onStopTrackingTouch(SeekBar seekBar) {
-//                xMin = seekBar.getProgress();
-//            }
-//        });
-//        seekBarYP.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//            @Override
-//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-//
-//            }
-//
-//            @Override
-//            public void onStartTrackingTouch(SeekBar seekBar) {
-//
-//            }
-//
-//            @Override
-//            public void onStopTrackingTouch(SeekBar seekBar) {
-//                yMax = seekBar.getProgress();
-//            }
-//        });
-//        seekBarYN.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//            @Override
-//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-//
-//            }
-//
-//            @Override
-//            public void onStartTrackingTouch(SeekBar seekBar) {
-//
-//            }
-//
-//            @Override
-//            public void onStopTrackingTouch(SeekBar seekBar) {
-//                yMin = seekBar.getProgress();
-//            }
-//        });
-        constraintLayout.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (isClickAlready){
-                    //При нажатии на View constraintLayout(Основной контейнер в этой Активити) Обьекты становятся то видимыми, то невидимыми().
-                    //Тоесть убирает GUI чтобы можно было посмотреть на график
-                    isClickAlready = false;
-                    XmaxEditText.setVisibility(View.VISIBLE);
-                    YmaxEditText.setVisibility(View.VISIBLE);
-                    XminEditText.setVisibility(View.VISIBLE);
-                    YminEditText.setVisibility(View.VISIBLE);
-
-                    cos.setVisibility(View.VISIBLE);
-                    sin.setVisibility(View.VISIBLE);
-                    exp.setVisibility(View.VISIBLE);
-                    pow.setVisibility(View.VISIBLE);
-
-                    XmaxTextView.setVisibility(View.VISIBLE);
-                    XminTextView.setVisibility(View.VISIBLE);
-                    YmaxTextView.setVisibility(View.VISIBLE);
-                    YminTextView.setVisibility(View.VISIBLE);
-
-                    CenaDelXEdit.setVisibility(View.VISIBLE);
-                    CenaDelYEdit.setVisibility(View.VISIBLE);
-                    CenaDelXView.setVisibility(View.VISIBLE);
-                    CenaDelYView.setVisibility(View.VISIBLE);
-
-                    seekBarXP.setVisibility(View.VISIBLE);
-                    seekBarYP.setVisibility(View.VISIBLE);
-                    seekBarXN.setVisibility(View.VISIBLE);
-                    seekBarYN.setVisibility(View.VISIBLE);
-                }else{
-                    isClickAlready = true;
-                    XmaxEditText.setVisibility(View.INVISIBLE);
-                    YmaxEditText.setVisibility(View.INVISIBLE);
-                    XminEditText.setVisibility(View.INVISIBLE);
-                    YminEditText.setVisibility(View.INVISIBLE);
-
-                    cos.setVisibility(View.INVISIBLE);
-                    sin.setVisibility(View.INVISIBLE);
-                    exp.setVisibility(View.INVISIBLE);
-                    pow.setVisibility(View.INVISIBLE);
-
-                    XmaxTextView.setVisibility(View.INVISIBLE);
-                    XminTextView.setVisibility(View.INVISIBLE);
-                    YmaxTextView.setVisibility(View.INVISIBLE);
-                    YminTextView.setVisibility(View.INVISIBLE);
-
-                    CenaDelXEdit.setVisibility(View.INVISIBLE);
-                    CenaDelYEdit.setVisibility(View.INVISIBLE);
-                    CenaDelXView.setVisibility(View.INVISIBLE);
-                    CenaDelYView.setVisibility(View.INVISIBLE);
-
-                    seekBarXP.setVisibility(View.INVISIBLE);
-                    seekBarYP.setVisibility(View.INVISIBLE);
-                    seekBarXN.setVisibility(View.INVISIBLE);
-                    seekBarYN.setVisibility(View.INVISIBLE);
-                }
-            }
-        });
         constraintLayout.setOnTouchListener((v, event) -> {
 
             int width = v.getWidth();
@@ -443,111 +250,12 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             public void onClick(View v) {
                 constraintLayout.removeView(drawView);
 
-                xMax = Double.parseDouble(XmaxEditText.getText().toString());
-                xMin = Double.parseDouble(XminEditText.getText().toString());
-                yMax = Double.parseDouble(YmaxEditText.getText().toString());
-                yMin = Double.parseDouble(YminEditText.getText().toString());
-//                xMax = seekBarXP.getProgress();
-//                xMin = -seekBarXN.getProgress();
-//                yMax = seekBarYP.getProgress();
-//                yMin = -seekBarYN.getProgress();
-                Cx = Double.parseDouble(CenaDelXEdit.getText().toString());
-                Cy = Double.parseDouble(CenaDelYEdit.getText().toString());
-
                 funcWeDo = FormulaInput.getText().toString();
-
                 calculetblePoints = null;
 
                 constraintLayout.addView(drawView,constraintLayout.getLayoutParams());
             }
         });
-
-        seekBarXN.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                constraintLayout.removeView(drawView);
-
-                xMin = -seekBar.getProgress();
-
-                constraintLayout.addView(drawView,constraintLayout.getLayoutParams());
-
-            }
-        });
-        seekBarXP.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                constraintLayout.removeView(drawView);
-
-                xMax = seekBar.getProgress();
-
-                constraintLayout.addView(drawView,constraintLayout.getLayoutParams());
-
-            }
-        });
-        seekBarYN.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-                constraintLayout.removeView(drawView);
-
-                yMin = - seekBar.getProgress();
-
-                constraintLayout.addView(drawView,constraintLayout.getLayoutParams());
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-        seekBarYP.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-                constraintLayout.removeView(drawView);
-
-                yMax = seekBar.getProgress();
-
-                constraintLayout.addView(drawView,constraintLayout.getLayoutParams());
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-
 
 //        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
@@ -843,32 +551,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
                         calculetblePoints.addAll(0, FormulSistem.Calculate(funcWeDo, fromx, tox, step));
                     }
-
-                    fromx = xMin;
-                    tox = xMax;
-
-
-//                    if (rightMove) {
-//                        fromx = calculetblePoints.get(calculetblePoints.size() - 1).element1;
-//
-//                        while (calculetblePoints.get(0).element1 < xMin){
-//                            calculetblePoints.remove(0);
-//                        }
-//
-//                        calculetblePoints.addAll(FormulSistem.Calculate(funcWeDo, fromx, tox,step));
-//                        Log.i("fromTO1","from " + fromx + " to " + tox);
-//                    }else{
-//                        tox = calculetblePoints.get(0).element1;
-//
-//                        for (int i = calculetblePoints.size() - 1;calculetblePoints.get(i).element1 > xMax;i--){
-//                            calculetblePoints.remove(i);
-//                        }
-//
-//                        calculetblePoints.addAll(0,FormulSistem.Calculate(funcWeDo, fromx, tox, step));
-//                        Log.i("fromTO2","from " + fromx + " to " + tox);
-//                    }
-////                    Log.i("afterCalc","1 = " + counter + " 2 = " + counter2);
-
                 }else {
                     calculetblePoints = FormulSistem.Calculate(funcWeDo, xMin, xMax, step);
                 }
@@ -879,7 +561,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
 
 
-            Path path = new Path();
+            @SuppressLint("DrawAllocation") Path path = new Path();
             int qweoipcj = 0;
             if (calculetblePoints != null){
                 for (int i = 0; i < calculetblePoints.size();i++){
@@ -900,14 +582,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
                     if (i <= qweoipcj){path.rMoveTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,(float)-calculetblePoints.get(i).element2*(float)yMult + (float)yCentre);}
                     path.lineTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,(float)-calculetblePoints.get(i).element2*(float)yMult + (float)yCentre);
-//
-//                    Log.i("calculateble",calculetblePoints.get(i).toString());
-//                    if (i >= 1){
-//                        points.add(calculetblePoints.get(i).element1*xMult + xCentre);
-//                        points.add(-calculetblePoints.get(i).element2*yMult + yCentre);
-//                    }
-//                    points.add(calculetblePoints.get(i).element1*xMult + xCentre);
-//                    points.add(-calculetblePoints.get(i).element2*yMult + yCentre);
+
                 }
             }
 

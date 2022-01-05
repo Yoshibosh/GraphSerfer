@@ -230,13 +230,13 @@ public class FormulSistem{
     }
 
     
-    static Boolean haveElements(char mass[],char element){
+    static Boolean haveElements(char[] mass, char element){
         for (char i : mass){
             if (i == element) return true;
         }
         return false;
     }
-    static Boolean haveElements(String mass[],String element){
+    static Boolean haveElements(String[] mass, String element){
         for (String i : mass){
             if (i.equals(element)) return true;
         }
