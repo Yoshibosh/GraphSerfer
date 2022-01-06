@@ -311,7 +311,9 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             if (ch == '.'){isDrob = true;}
         }
         if (!isDrob){return null;}
-        return new Pair<Double,Double>(Double.parseDouble(cel.substring(0,cel.length() - 1)),Double.parseDouble("0." + drob));
+        String minus = "";
+        if (d < 0){minus = "-";}
+        return new Pair<Double,Double>(Double.parseDouble(cel.substring(0,cel.length() - 1)),Double.parseDouble(minus +"0." + drob));
     }
 
     protected String GetTheEditTextText(EditText view){
@@ -404,7 +406,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             int ky = (int) ((yMax - yMin)/Cy);
 
             //Цена деления c учётом разрешения экрана
-            double Cex = (double)width/kx;
+            double Cex = (double)width/((xMax - xMin)/Cx);
             double Cey = (double)height/((yMax - yMin)/Cy);
 
             //Множители X и Y для соотсвествия разрешению экрана
@@ -435,6 +437,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             double Korrektirovka;
             double extraX = 0;
 
+            int negOrPos = 1;
+            if (xMin > 0) {negOrPos = -1;};
 
             if (is2TouchNow){
 //                xRealCentre = DrobAndCelayaChast(CentreOf2Touches.x/Cex).first*Cex;
@@ -446,6 +450,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
                 xRealCentre = CentreOf2Touches.x;
                 yRealCentre = CentreOf2Touches.y;
+//                negOrPos *= -1;
             }
             Log.i("FuckLohov","1 = " + DrobAndCelayaChast((CentreOf2Touches.x*kx/width)/Cx).first*Cx+ "\t2 = " + CentreOf2Touches.x*kx/width);
 
@@ -455,9 +460,10 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 //                extraX = (DrobAndCelayaChast(xMin/Cx).second)*Cex;
 //                Log.i("DROB","" + DrobAndCelayaChast(xMin/Cx).first);
 //            }
-            count = xMin;
-            double extra = (1 - DrobAndCelayaChast(Math.abs(xMin/Cx)).second)*Cex;
-            for (double x = 0 + extra;x < xRealCentre;x += Cex){
+
+            count = DrobAndCelayaChast(xMin/Cx).first*Cx;
+            double extra = (1 - DrobAndCelayaChast(xMin/Cx).second)*Cex;
+            for (double x = extra - Cex;x < width;x += Cex){
 
 
                 p.setAlpha(100);
@@ -471,13 +477,14 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                 p.setStyle(Paint.Style.STROKE);
             }
 
-
+            Log.i("fweq","xRC = " + xRealCentre + " yRC = " + yRealCentre);
             extraX = 0;
-//            if (is2TouchNow){
+            if (is2TouchNow){
+                negOrPos *= -1;
 //                count = DrobAndCelayaChast((CentreOf2Touches.x*kx/width)/Cx).first*Cx - Cx;
 //
 //                extraX = (DrobAndCelayaChast((CentreOf2Touches.x*kx/width)/Cx).second)*Cex;
-//            }
+            }
 //            if (xRealCentre == 0){extraX = -Cex;}
 //            if (xRealCentre == width){
 //                count = DrobAndCelayaChast( xMax/Cx).first*Cx - Cx;
@@ -485,71 +492,71 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 //                extraX = (DrobAndCelayaChast(xMax/Cx).second)*Cex;
 //                Log.i("DROB","" + DrobAndCelayaChast(xMin/Cx).first);
 //            }
-            count = xMax;
-            extra = (DrobAndCelayaChast(Math.abs(xMax/Cx)).second)*Cex;
-            for (double x = width - extra;x > xRealCentre;x -= Cex){
-
-                p.setAlpha(100);
-                canvas.drawLine((float)x,0,(float)x,(float)height,p);
-                p.setAlpha(255);
-
-                p.setStyle(Paint.Style.FILL);
-//                p.setStrokeWidth(5);
-                canvas.drawText(String.format("%." + decimalPlacesX +"f",count), (float)(x), (float) yCentre, p);
-                count -= Cx;
-                p.setStyle(Paint.Style.STROKE);
-            }
+//            count = xMax;
+//            extra = negOrPos*(1 - DrobAndCelayaChast(xMin/Cx).second)*Cex;
+//            for (double x = extra;x < width;x += Cex){
+//
+//                p.setAlpha(100);
+//                canvas.drawLine((float)x,0,(float)x,(float)height,p);
+//                p.setAlpha(255);
+//
+//                p.setStyle(Paint.Style.FILL);
+////                p.setStrokeWidth(5);
+//                canvas.drawText(String.format("%." + decimalPlacesX +"f",count), (float)(x), (float) yCentre, p);
+//                count -= Cx;
+//                p.setStyle(Paint.Style.STROKE);
+//            }
 
             double extraY = 0;
-            count = -Cy;
-            if (is2TouchNow){
-                count = DrobAndCelayaChast((CentreOf2Touches.y*ky/height)/Cy).first*Cy;
+            count = 0;
+//            if (is2TouchNow){
+//                count = DrobAndCelayaChast((CentreOf2Touches.y*ky/height)/Cy).first*Cy;
+//
+//                extraY = Cey;
+//            }
+//            if (yRealCentre == 0){
+//                count = DrobAndCelayaChast(yMax/Cy).first*Cy - Cy;
+//
+//                extraY = (DrobAndCelayaChast(yMax/Cy).second)*Cey;
+//                Log.i("DROB","" + DrobAndCelayaChast(yMin/Cy).first);
+//            }
+            count = DrobAndCelayaChast(yMin/Cy).first*Cy;
+            extra = (1 - DrobAndCelayaChast(yMin/Cy).second)*Cey;
+            for (double y = height + Cey - extra;y > 0;y -= Cey){
 
-                extraY = Cey;
-            }
-            if (yRealCentre == 0){
-                count = DrobAndCelayaChast(yMax/Cy).first*Cy - Cy;
-
-                extraY = (DrobAndCelayaChast(yMax/Cy).second)*Cey;
-                Log.i("DROB","" + DrobAndCelayaChast(yMin/Cy).first);
-            }
-            for (double y = yRealCentre + Cey - extraY;y < height;y += Cey){
                 p.setAlpha(100);
                 canvas.drawLine(0,(float)y,(float)width,(float)y,p);
                 p.setAlpha(255);
 
                 p.setStyle(Paint.Style.FILL);
-                Korrektirovka = 0;
-//                if(y + Cey > height){Korrektirovka = -Cey*0.1;}
-//                if(y == (yRealCentre + Cey)){Korrektirovka = +Cey*0.1;}
-                canvas.drawText(String.format("%." + decimalPlacesY +"f",count), (float)xCentre, (float) (y + Korrektirovka), p);
-                count -= Cy;
-                p.setStyle(Paint.Style.STROKE);
-            }
-            count = Cy;
-            if (is2TouchNow){
-                count = DrobAndCelayaChast((CentreOf2Touches.y*ky/height)/Cy).first*Cy;
-                extraY = 0;
-            }
-            if (yRealCentre == height){
-                count = DrobAndCelayaChast(yMin/Cy).first*Cy + Cy;
-
-                extraY = (DrobAndCelayaChast(yMin/Cy).second)*Cey;
-                Log.i("DROB","" + DrobAndCelayaChast(yMin/Cy).first);
-            }
-            for (double y = yRealCentre - Cey + extraY;y > 0;y -= Cey){
-                p.setAlpha(100);
-                canvas.drawLine(0,(float)y,(float)width,(float)y,p);
-                p.setAlpha(255);
-
-                p.setStyle(Paint.Style.FILL);
-                Korrektirovka = 0;
-//                if(y - Cey < 0){Korrektirovka = Cey*0.1;}
-//                if(y == (yRealCentre - Cey)){Korrektirovka = Cey*0.1;}
-                canvas.drawText(String.format("%." + decimalPlacesY +"f",count), (float)xCentre, (float) (y + Korrektirovka), p);
+                canvas.drawText(String.format("%." + decimalPlacesY +"f",count), (float)xCentre, (float) (y), p);
                 count += Cy;
                 p.setStyle(Paint.Style.STROKE);
             }
+//            count = Cy;
+//            if (is2TouchNow){
+//                count = DrobAndCelayaChast((CentreOf2Touches.y*ky/height)/Cy).first*Cy;
+//                extraY = 0;
+//            }
+//            if (yRealCentre == height){
+//                count = DrobAndCelayaChast(yMin/Cy).first*Cy + Cy;
+//
+//                extraY = (DrobAndCelayaChast(yMin/Cy).second)*Cey;
+//                Log.i("DROB","" + DrobAndCelayaChast(yMin/Cy).first);
+//            }
+//            for (double y = yRealCentre - Cey + extraY;y > 0;y -= Cey){
+//                p.setAlpha(100);
+//                canvas.drawLine(0,(float)y,(float)width,(float)y,p);
+//                p.setAlpha(255);
+//
+//                p.setStyle(Paint.Style.FILL);
+//                Korrektirovka = 0;
+////                if(y - Cey < 0){Korrektirovka = Cey*0.1;}
+////                if(y == (yRealCentre - Cey)){Korrektirovka = Cey*0.1;}
+//                canvas.drawText(String.format("%." + decimalPlacesY +"f",count), (float)xCentre, (float) (y + Korrektirovka), p);
+//                count += Cy;
+//                p.setStyle(Paint.Style.STROKE);
+//            }
             p.setStrokeWidth(5);
 
             p.setColor(Color.RED);
