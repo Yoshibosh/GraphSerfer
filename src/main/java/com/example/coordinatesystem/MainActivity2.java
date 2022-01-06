@@ -167,6 +167,13 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
                 case MotionEvent.ACTION_MOVE: // движение
                     if (pointerCount == 2){
+
+
+                        if (!isFirst2Touch){
+                            CentreOf2Touches.x = (event.getX(0) + event.getX(1))/2;
+                            CentreOf2Touches.y = (event.getY(0) + event.getY(1))/2;
+                        }
+
                         double[] xDiffA = new double[]{0,0};
                         double[] yDiffA = new double[]{0,0};
                         int secondTouchIndex = 1;
@@ -194,11 +201,12 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
                         double superSumDiff = sumDiff[0] + sumDiff[1];
 
+                        double speed = 2;
 
-                        xMax = xMax + xDiffA[whoStayRight]*(xMax - xMin)/(width) - xDiffA[Math.abs(whoStayRight - 1)]*(xMax - xMin)/(width);
-                        xMin = xMin - xDiffA[whoStayRight]*(xMax - xMin)/(width) + xDiffA[Math.abs(whoStayRight - 1)]*(xMax - xMin)/(width);
-                        yMax = yMax - yDiffA[whoHeier]*(yMax - yMin)/(height) + yDiffA[Math.abs(whoHeier - 1)]*(yMax - yMin)/(height);
-                        yMin = yMin + yDiffA[whoHeier]*(yMax - yMin)/(height) - yDiffA[Math.abs(whoHeier - 1)]*(yMax - yMin)/(height);
+                        xMax += speed*(1 - CentreOf2Touches.x/width)*(xDiffA[whoStayRight] - xDiffA[Math.abs(whoStayRight - 1)])*(xMax - xMin)/(width);
+                        xMin += speed*(CentreOf2Touches.x/width)*(- xDiffA[whoStayRight] + xDiffA[Math.abs(whoStayRight - 1)])*(xMax - xMin)/(width);
+                        yMax += speed*(CentreOf2Touches.y/height)*(- yDiffA[whoHeier] + yDiffA[Math.abs(whoHeier - 1)])*(yMax - yMin)/(height);
+                        yMin += speed*(1 - CentreOf2Touches.y/height)*(yDiffA[whoHeier] - yDiffA[Math.abs(whoHeier - 1)])*(yMax - yMin)/(height);
 
                         Log.i("XYMAXMININTOUCH","[xMax = " + xMax + ", xMin = " + xMin + ",yMax = " + yMax + ", yMin = " + yMin + "] + ActionIndex = " + event.getPointerId(pointerIndex) + " size:" + scaleTouches.size());
 
@@ -213,11 +221,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
                         scaleTouches.get(1).lastXMovePos =  event.getX(1);
                         scaleTouches.get(1).lastYMovePos =  event.getY(1);
-
-                        if (!isFirst2Touch){
-                            CentreOf2Touches.x = (event.getX(0) + event.getX(1))/2;
-                            CentreOf2Touches.y = (event.getY(0) + event.getY(1))/2;
-                        }
 
                         isFirst2Touch = true;
                         constraintLayout.removeView(drawView);
@@ -350,6 +353,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             // толщина линии = 10
             p.setStrokeWidth(5);
 
+            p.setAntiAlias(true);
+
             //Высота и ширина экрана
             int width = getWidth();
             int height = getHeight();
@@ -390,20 +395,10 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 //            Cy = DrobAndCelayaChast(Math.log10(yMax - yMin)).first;
             Log.i("Cy","" + Cy);
 
-
-            //Лист с точками функции
-            ArrayList<Double> points = new ArrayList<>();
-
             double step;
             //Центры координатных осей относительно сторон экрана
             double xCentre = ( - xMin/(xMax - xMin))*width;
             double yCentre = (yMax/(yMax - yMin))*height;
-            double xRealCentre = width/2;
-            double yRealCentre = height/2;
-
-            //Кол-во делений на коорд сетке
-            int kx = (int) ((xMax - xMin)/Cx);
-            int ky = (int) ((yMax - yMin)/Cy);
 
             //Цена деления c учётом разрешения экрана
             double Cex = (double)width/((xMax - xMin)/Cx);
@@ -433,130 +428,59 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             Log.i("Decmalplases",decimalPlacesX + " " + decimalPlacesY);
             Log.i("VspomogatZnach","[" +Cex + ',' + Cey + ']' + '+' + '[' + xCentre + ',' + yCentre + ']' );
             Log.i("assHole","[xMax " + xMax + "|xMin " + xMin + "|yMax " + yMax + "|yMin " + yMin + ']');
-            double count = 0;
-            double Korrektirovka;
-            double extraX = 0;
 
-            int negOrPos = 1;
-            if (xMin > 0) {negOrPos = -1;};
 
-            if (is2TouchNow){
-//                xRealCentre = DrobAndCelayaChast(CentreOf2Touches.x/Cex).first*Cex;
-//                yRealCentre = DrobAndCelayaChast(CentreOf2Touches.y/Cey).first*Cey;
-//
-//                count = DrobAndCelayaChast((CentreOf2Touches.x*kx/width)/Cx).first*Cx - Cx;
-//
-//                extraX = (DrobAndCelayaChast((CentreOf2Touches.x/Cex)).second)*Cex;
-
-                xRealCentre = CentreOf2Touches.x;
-                yRealCentre = CentreOf2Touches.y;
-//                negOrPos *= -1;
-            }
-            Log.i("FuckLohov","1 = " + DrobAndCelayaChast((CentreOf2Touches.x*kx/width)/Cx).first*Cx+ "\t2 = " + CentreOf2Touches.x*kx/width);
-
-//            if (xRealCentre == 0){
-//                count = DrobAndCelayaChast(xMin/Cx).first*Cx + Cx;
-//
-//                extraX = (DrobAndCelayaChast(xMin/Cx).second)*Cex;
-//                Log.i("DROB","" + DrobAndCelayaChast(xMin/Cx).first);
-//            }
-
-            count = DrobAndCelayaChast(xMin/Cx).first*Cx;
+            double count;
+            p.setStyle(Paint.Style.FILL);
+            count = DrobAndCelayaChast(xMin/Cx).first*Cx - Cx;
             double extra = (1 - DrobAndCelayaChast(xMin/Cx).second)*Cex;
-            for (double x = extra - Cex;x < width;x += Cex){
+            for (double x = extra - 2*Cex;x < width;x += Cex){
 
 
                 p.setAlpha(100);
                 canvas.drawLine((float)x,0,(float)x,(float)height,p);
+                p.setAlpha(50);
+                for (double i = x;i < x + Cex; i += Cex/5){
+                    canvas.drawLine((float)i,0,(float)i,(float)height,p);
+                }
                 p.setAlpha(255);
 
 
-                p.setStyle(Paint.Style.FILL);
-                canvas.drawText(String.format("%." + decimalPlacesX +"f",count), (float)(x), (float) yCentre, p);
+                if (yCentre < 0){
+                    canvas.drawText(String.format("%." + decimalPlacesX +"f",count), (float)(x), (float) (height*0.04), p);
+                }else if (yCentre > height){
+                    canvas.drawText(String.format("%." + decimalPlacesX +"f",count), (float)(x), (float) (height*0.98), p);
+                }else{
+                    canvas.drawText(String.format("%." + decimalPlacesX +"f",count), (float)(x), (float) yCentre, p);
+                }
+
                 count += Cx;
-                p.setStyle(Paint.Style.STROKE);
             }
-
-            Log.i("fweq","xRC = " + xRealCentre + " yRC = " + yRealCentre);
-            extraX = 0;
-            if (is2TouchNow){
-                negOrPos *= -1;
-//                count = DrobAndCelayaChast((CentreOf2Touches.x*kx/width)/Cx).first*Cx - Cx;
-//
-//                extraX = (DrobAndCelayaChast((CentreOf2Touches.x*kx/width)/Cx).second)*Cex;
-            }
-//            if (xRealCentre == 0){extraX = -Cex;}
-//            if (xRealCentre == width){
-//                count = DrobAndCelayaChast( xMax/Cx).first*Cx - Cx;
-//
-//                extraX = (DrobAndCelayaChast(xMax/Cx).second)*Cex;
-//                Log.i("DROB","" + DrobAndCelayaChast(xMin/Cx).first);
-//            }
-//            count = xMax;
-//            extra = negOrPos*(1 - DrobAndCelayaChast(xMin/Cx).second)*Cex;
-//            for (double x = extra;x < width;x += Cex){
-//
-//                p.setAlpha(100);
-//                canvas.drawLine((float)x,0,(float)x,(float)height,p);
-//                p.setAlpha(255);
-//
-//                p.setStyle(Paint.Style.FILL);
-////                p.setStrokeWidth(5);
-//                canvas.drawText(String.format("%." + decimalPlacesX +"f",count), (float)(x), (float) yCentre, p);
-//                count -= Cx;
-//                p.setStyle(Paint.Style.STROKE);
-//            }
-
-            double extraY = 0;
-            count = 0;
-//            if (is2TouchNow){
-//                count = DrobAndCelayaChast((CentreOf2Touches.y*ky/height)/Cy).first*Cy;
-//
-//                extraY = Cey;
-//            }
-//            if (yRealCentre == 0){
-//                count = DrobAndCelayaChast(yMax/Cy).first*Cy - Cy;
-//
-//                extraY = (DrobAndCelayaChast(yMax/Cy).second)*Cey;
-//                Log.i("DROB","" + DrobAndCelayaChast(yMin/Cy).first);
-//            }
             count = DrobAndCelayaChast(yMin/Cy).first*Cy;
             extra = (1 - DrobAndCelayaChast(yMin/Cy).second)*Cey;
-            for (double y = height + Cey - extra;y > 0;y -= Cey){
+            for (double y = height + Cey - extra;y > 0 - Cey;y -= Cey){
 
                 p.setAlpha(100);
                 canvas.drawLine(0,(float)y,(float)width,(float)y,p);
+                p.setAlpha(50);
+                for (double i = y;i < y + Cey; i += Cey/5){
+                    canvas.drawLine(0,(float)i,(float)width,(float)i,p);
+                }
                 p.setAlpha(255);
 
-                p.setStyle(Paint.Style.FILL);
-                canvas.drawText(String.format("%." + decimalPlacesY +"f",count), (float)xCentre, (float) (y), p);
+                if (y == yCentre){count += Cy;continue;}
+
+                if (xCentre < 0){
+                    canvas.drawText(String.format("%." + decimalPlacesY +"f",count), (float)(width*0.02), (float) (y), p);
+                }else if (xCentre > width){
+                    canvas.drawText(String.format("%." + decimalPlacesY +"f",count), (float)(width*0.98), (float) (y), p);
+                }else {
+                    canvas.drawText(String.format("%." + decimalPlacesY + "f", count), (float) xCentre, (float) (y), p);
+                }
                 count += Cy;
-                p.setStyle(Paint.Style.STROKE);
             }
-//            count = Cy;
-//            if (is2TouchNow){
-//                count = DrobAndCelayaChast((CentreOf2Touches.y*ky/height)/Cy).first*Cy;
-//                extraY = 0;
-//            }
-//            if (yRealCentre == height){
-//                count = DrobAndCelayaChast(yMin/Cy).first*Cy + Cy;
-//
-//                extraY = (DrobAndCelayaChast(yMin/Cy).second)*Cey;
-//                Log.i("DROB","" + DrobAndCelayaChast(yMin/Cy).first);
-//            }
-//            for (double y = yRealCentre - Cey + extraY;y > 0;y -= Cey){
-//                p.setAlpha(100);
-//                canvas.drawLine(0,(float)y,(float)width,(float)y,p);
-//                p.setAlpha(255);
-//
-//                p.setStyle(Paint.Style.FILL);
-//                Korrektirovka = 0;
-////                if(y - Cey < 0){Korrektirovka = Cey*0.1;}
-////                if(y == (yRealCentre - Cey)){Korrektirovka = Cey*0.1;}
-//                canvas.drawText(String.format("%." + decimalPlacesY +"f",count), (float)xCentre, (float) (y + Korrektirovka), p);
-//                count += Cy;
-//                p.setStyle(Paint.Style.STROKE);
-//            }
+            p.setStyle(Paint.Style.STROKE);
+
             p.setStrokeWidth(5);
 
             p.setColor(Color.RED);
@@ -564,8 +488,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             //Строиться с точностью до 0.01*ЦенаДеления
             step = 0.005*Cx;
 
-            Log.i("AssCum","" + funcsWeDo.size());
-            Log.i("AssCum","" + allCalculetblePoints.size());
             double fromx = xMin;
             double tox = xMax;
             try {
@@ -652,7 +574,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 //            canvas.drawLines(new float[]{100,100,100,500},p);
             //Построение графика заданной функции
             p.setStrokeWidth(3);
-            p.setAntiAlias(true);
             p.setStyle(Paint.Style.STROKE);
 
             for (Path path : paths){
