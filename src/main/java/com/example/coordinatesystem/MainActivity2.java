@@ -51,6 +51,11 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
     double yMin = -5;
     double yMax = 5;
 
+    double lastXmax;
+    double lastXmin;
+    double lastYmax;
+    double lastYmin;
+
     Map<String,Double> XYmaxesAndMines = new HashMap<>();
 
 
@@ -297,6 +302,12 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             for (char s : string){
                 decimalPlases++;
             }
+        }else if (string.length > 3){
+            if (string[0] == '1' && string[3] == 'E'){
+                return Integer.parseInt(String.valueOf(string[string.length - 1]));
+            }else{
+                return 0;
+            }
         }else{
             return 0;
         }
@@ -359,8 +370,16 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             int width = getWidth();
             int height = getHeight();
 
+            //Пердел увелечения и уменьшения масштаба
+            if (xMax - xMin < 0.000001){xMax = lastXmax;xMin = lastXmin;}
+            if (yMax - yMin < 0.000001){yMax = lastYmax;yMin = lastYmin;}
+            lastXmax = xMax;
+            lastXmin = xMin;
+            lastYmax = yMax;
+            lastYmin = yMin;
+
             double koef;
-            if (Math.log10(xMax - xMin) < 1){koef = -1;}else{koef = 0;}
+            if (Math.log10(xMax - xMin) < 1){koef = -0.5;}else{koef = 0.2;}
             int jija = (int)Math.round(Math.log10(xMax - xMin) + koef);
             String jojo = "";
             if (jija < 0){
@@ -376,7 +395,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                 }
             }
             Cx = Double.parseDouble(jojo);
-            if (Math.log10(yMax - yMin) < 1){koef = -1;}else{koef = 0;}
+            if (Math.log10(yMax - yMin) < 1){koef = -0.5;}else{koef = 0.2;}
             jija = (int)Math.round(Math.log10(yMax - yMin) + koef);
             jojo = "";
             if (jija < 0){
@@ -414,6 +433,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             p.setAlpha(100);
             canvas.drawLine((float)xCentre,(float) height,(float)xCentre,0,p);
             canvas.drawLine(0,(float)yCentre,(float)width,(float)yCentre,p);
+
+
 
             //Деления
             //Строиться для каждой полуоси отдельно(4 цикла) выводится текст и строятся деления
@@ -471,9 +492,9 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                 if (y == yCentre){count += Cy;continue;}
 
                 if (xCentre < 0){
-                    canvas.drawText(String.format("%." + decimalPlacesY +"f",count), (float)(width*0.02), (float) (y), p);
+                    canvas.drawText(String.format("%." + decimalPlacesY +"f",count), (float)(width*(0.02 + Math.pow((decimalPlacesY),1.0001)/100)), (float) (y), p);
                 }else if (xCentre > width){
-                    canvas.drawText(String.format("%." + decimalPlacesY +"f",count), (float)(width*0.98), (float) (y), p);
+                    canvas.drawText(String.format("%." + decimalPlacesY +"f",count), (float)(width*(0.98 - Math.pow((decimalPlacesY),1.0001)/100)), (float) (y), p);
                 }else {
                     canvas.drawText(String.format("%." + decimalPlacesY + "f", count), (float) xCentre, (float) (y), p);
                 }
