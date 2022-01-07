@@ -26,7 +26,7 @@ public class FormulSistem{
 
     public interface Function{
     }
-    class NamedFunction implements Function{
+    static class NamedFunction implements Function{
         String name;
         Function arg;
 
@@ -46,7 +46,7 @@ public class FormulSistem{
             
         }
     }
-    class Constant implements Function{
+    static class Constant implements Function{
         double value;
         Constant(double value){
             this.value = value;
@@ -56,7 +56,7 @@ public class FormulSistem{
             return String.valueOf(value);
         }
     }
-    public class Binop2 implements Function{
+    public static class Binop2 implements Function{
         Function f1;
         Function f2;
         String op;
@@ -107,7 +107,7 @@ public class FormulSistem{
                             Pair<Function,int[]> curFunc = TransformToFunc2(func, curTokIndex+1);
 
                             if (maybeFunc.element2 == "simbol"){
-                                functions.add(0,new Pair<Function,int[]>(formulSistem.new NamedFunction(maybeFunc.element1,curFunc.element1),new int[]{curTokIndex - 1,curFunc.element2[1]}));
+                                functions.add(0,new Pair<Function,int[]>(new NamedFunction(maybeFunc.element1, curFunc.element1),new int[]{curTokIndex - 1,curFunc.element2[1]}));
                                 functions.remove(curFunc);
                                 if (functions.get(0).element2[0] == 0 && functions.get(0).element2[1] == func.length - 1){
                                     Pair<Function,int[]> result = functions.get(0);
@@ -137,10 +137,10 @@ public class FormulSistem{
                         isAloneEl = false;
                         switch (alone.element2){
                             case "number":
-                                functions.add(0,new Pair<Function,int[]>(formulSistem.new Constant(Double.valueOf(alone.element1)),new int[]{curTokIndex - 2,curTokIndex}));
+                                functions.add(0,new Pair<Function,int[]>(new Constant(Double.valueOf(alone.element1)),new int[]{curTokIndex - 2,curTokIndex}));
                                 return functions.get(0);
                             case "simbol":
-                                functions.add(0,new Pair<Function,int[]>(formulSistem.new NamedFunction(alone.element1, null),new int[]{curTokIndex - 2,curTokIndex}));
+                                functions.add(0,new Pair<Function,int[]>(new NamedFunction(alone.element1, null),new int[]{curTokIndex - 2,curTokIndex}));
                                 return functions.get(0);
                         }
                     }
@@ -189,20 +189,20 @@ public class FormulSistem{
                     if (leftOperIsString){
                         switch (leftOperandS.element2){
                             case "number":
-                                leftOperand = new Pair<Function,int[]>(formulSistem.new Constant(Double.valueOf(leftOperandS.element1)),new int[]{curTokIndex-1,curTokIndex-1});
+                                leftOperand = new Pair<Function,int[]>(new Constant(Double.valueOf(leftOperandS.element1)),new int[]{curTokIndex-1,curTokIndex-1});
                                 break;
                             case "simbol":
-                                leftOperand = new Pair<Function,int[]>(formulSistem.new NamedFunction(leftOperandS.element1, null),new int[]{curTokIndex-1,curTokIndex-1});
+                                leftOperand = new Pair<Function,int[]>(new NamedFunction(leftOperandS.element1, null),new int[]{curTokIndex-1,curTokIndex-1});
                                 break;
                         }
                     }
                     if (rightOperIsString){
                         switch (rightOperandS.element2){
                             case "number":
-                                rightOperand = new Pair<Function,int[]>(formulSistem.new Constant(Double.valueOf(rightOperandS.element1)),new int[]{curTokIndex+1,curTokIndex+1});
+                                rightOperand = new Pair<Function,int[]>(new Constant(Double.valueOf(rightOperandS.element1)),new int[]{curTokIndex+1,curTokIndex+1});
                                 break;
                             case "simbol":
-                                rightOperand = new Pair<Function,int[]>(formulSistem.new NamedFunction(rightOperandS.element1, null),new int[]{curTokIndex+1,curTokIndex+1});
+                                rightOperand = new Pair<Function,int[]>(new NamedFunction(rightOperandS.element1, null),new int[]{curTokIndex+1,curTokIndex+1});
                                 break;
                         }
                     }
@@ -210,9 +210,9 @@ public class FormulSistem{
                     if (leftOperand.element1.getClass().equals(Constant.class) && rightOperand.element1.getClass().equals(Constant.class)){
                         Constant left = (Constant)leftOperand.element1;
                         Constant right = (Constant)rightOperand.element1;
-                        functions.add(0,new Pair<Function,int[]>(formulSistem.new Constant(left.value + right.value),new int[]{leftOperand.element2[0],rightOperand.element2[1]}));
+                        functions.add(0,new Pair<Function,int[]>(new Constant(left.value + right.value),new int[]{leftOperand.element2[0],rightOperand.element2[1]}));
                     }else{
-                        functions.add(0,new Pair<Function,int[]>(formulSistem.new Binop2(leftOperand.element1, rightOperand.element1, tok.element1),new int[]{leftOperand.element2[0],rightOperand.element2[1]}));
+                        functions.add(0,new Pair<Function,int[]>(new Binop2(leftOperand.element1, rightOperand.element1, tok.element1),new int[]{leftOperand.element2[0],rightOperand.element2[1]}));
                     }
 
 

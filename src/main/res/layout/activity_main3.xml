@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/constraintLayoutActiv3"
+    android:background="@color/white"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity2">
@@ -14,30 +15,87 @@
         android:layout_height="70dp"
         android:text="@string/BuildTheGrath"
         android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayoutActiv3IN"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/FormulaInput"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <EditText
-        android:id="@+id/FormulaInput"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:autofillHints="ahui"
-        android:background="@color/gray"
-        android:inputType="text"
-        android:textSize="30sp"
-        android:text="@string/xVstepeni2"
-        android:textAlignment="center"
-        android:textColor="@color/DeepBrown"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.000" />
+        app:layout_constraintVertical_bias="1.0" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayoutActiv3IN"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:alpha="255"
+        android:background="@color/DeepBrown"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        tools:context=".MainActivity2"
+        tools:layout_editor_absoluteX="0dp">
+
+
+        <ScrollView
+
+            android:id="@+id/scrollView2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="255"
+            android:background="@color/cardview_dark_background"
+
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:orientation="vertical"
+                android:id="@+id/formula_inputs_container"
+                >
+
+
+                <EditText
+                    android:id="@+id/FormulaInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp"
+                    android:drawableBottom="@color/purple_500"
+                    android:layout_marginBottom="5dp"
+
+
+                    android:alpha="255"
+                    android:autofillHints="ahui"
+                    android:background="@color/white"
+                    android:inputType="text"
+                    android:labelFor="@id/constraintLayoutActiv3"
+                    android:text="@string/xVstepeni2"
+                    android:textAlignment="center"
+                    android:textColor="@color/DeepBrown"
+                    android:textSize="30sp"
+                    android:visibility="visible"
+
+
+                    />
+                <!--                    android:layout_marginStart="5dp"-->
+                <!--                    android:layout_marginEnd="5dp"-->
+                <!--                    android:layout_marginBottom="5dp"-->
+                <!--                    android:layout_marginTop="5dp"-->
+
+
+            </LinearLayout>
+
+        </ScrollView>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
