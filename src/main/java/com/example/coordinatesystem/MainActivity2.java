@@ -1,5 +1,6 @@
 package com.example.coordinatesystem;
 
+import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -20,13 +21,16 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.Layout;
 import android.text.TextWatcher;
 import android.text.method.Touch;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -69,7 +73,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
     Map<String,Double> XYmaxesAndMines = new HashMap<>();
 
     ArrayList<ImageButton> imageButtons = new ArrayList<>();
-    ArrayList<EditText> formulaImputs = new ArrayList<>();
+    ArrayList<Pair<EditText,Integer>> formulaImputs = new ArrayList<>();
 
     ArrayList<String> funcsWeDo = new ArrayList<>();
     int funcCount = 0;
@@ -119,11 +123,12 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main3);
+        setContentView(R.layout.activity_main4);
 
 
         constraintLayout = findViewById(R.id.constraintLayoutActiv3);
@@ -150,27 +155,105 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 //        }
 
         Button build = findViewById(R.id.build);
-        LinearLayout lin = (LinearLayout)findViewById(R.id.formula_inputs_container);
-        formulaImputs.add(findViewById(R.id.FormulaInput));
+        LinearLayout lin = (LinearLayout)findViewById(R.id.formula_inputs_container_container);
+        LinearLayout linH1 = (LinearLayout)findViewById(R.id.formula_inputs_container);
+        LinearLayout linH2 = (LinearLayout)findViewById(R.id.formula_inputs_container2);
+
+
+
+        formulaImputs.add(new Pair<>(findViewById(R.id.FormulaInput),0));
+
         EditText formI = (EditText)findViewById(R.id.FormulaInput);
+
+        ImageButton create = (ImageButton)findViewById(R.id.ImageBtnCreate);
+        ImageButton close = (ImageButton)findViewById(R.id.ImageBtnDestroy);
+
+        Log.i("Create",create.toString());
+
         funcsWeDo.add(formI.getText().toString());
 
-        EditText ed = (EditText) lin.getChildAt(0);
-        ed.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                addTextChangeListnerRecurse(0);
-            }
+        create.setOnClickListener(v -> {
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+            LinearLayout linH = (LinearLayout) lin.getChildAt(0);
+            EditText newFormulaInput = (EditText)linH.getChildAt(0);
+            EditText formInpt = new EditText(v.getContext());
 
-            @Override
-            public void afterTextChanged(Editable s) {
+            linH = (LinearLayout) v.getParent();
 
-            }
+            formInpt.setBackground(newFormulaInput.getBackground());
+            formInpt.setTextSize(30);
+            formInpt.setTextColor(newFormulaInput.getCurrentTextColor());
+            formInpt.setTextAlignment(newFormulaInput.getTextAlignment());
+
+
+            ImageButton newClose = new ImageButton(v.getContext());
+            newClose.setOnClickListener(v1 -> {
+                lin.removeView((View) v1.getParent());
+                RefreshDrawParametrs();
+            });
+
+            linH.removeView(create);
+            linH.addView(formInpt,0,newFormulaInput.getLayoutParams());
+            linH.addView(newClose,close.getLayoutParams());
+//            linH.getChildAt(1).setBackgroundColor(getColor(R.color.white));
+//            linH.getChildAt(1).setVisibility(View.VISIBLE);
+//            ImageButton newclose =  (ImageButton) linH.getChildAt(1);
+//            newclose.setImageResource(R.drawable.close);
+
+            funcsWeDo.add("");
+
+
+
+            LinearLayout newLinH = new LinearLayout(linH.getContext());
+            newLinH.setOrientation(LinearLayout.HORIZONTAL);
+            newLinH.setGravity(Gravity.END);
+
+
+            newLinH.addView(create);
+            lin.addView(newLinH,linH.getLayoutParams());
         });
+
+//        formI.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//
+//            }
+//        });
+
+//        formI.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                OnClickListnerRecurse(0);
+//            }
+//        });
+
+
+//        EditText ed = (EditText) lin.getChildAt(0);
+//        ed.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//                OnClickListnerRecurse(0);
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//
+//            }
+//        });
 
 
 
@@ -311,74 +394,132 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
 
 
-        build.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                for (int i = 0;i < lin.getChildCount();i++) {
-                    EditText FormulaInput = (EditText) lin.getChildAt(i);
-                    try {
-                        Log.i("GetText", ""  + FormulaInput.getText().toString() + " size = " + FormulaInput.getText().toString().length());
-                        FormulSistem.Calculate(FormulaInput.getText().toString(),0,1,0.2);
-                        funcsWeDo.remove(i);
-                        funcsWeDo.add(i,FormulaInput.getText().toString());
-
-                        allCalculetblePoints.remove(FormulaInput.getText().toString());
-                        allCalculetblePoints.put(FormulaInput.getText().toString(),null);
-
-
-                        constraintLayout.removeView(drawView);
-                        constraintLayout.addView(drawView,0,constraintLayout.getLayoutParams());
-
-                    }catch (Exception e){
-                        Log.i("ERROROFSEX",e.getMessage());
-                    }
-                }
-            }
-        });
+        build.setOnClickListener(v -> RefreshDrawParametrs());
 
 //        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
 
-    void addTextChangeListnerRecurse(int index){
+    void RefreshDrawParametrs(){
+        LinearLayout lin = (LinearLayout)findViewById(R.id.formula_inputs_container_container);
+        allCalculetblePoints.clear();
+        funcsWeDo.clear();
+        for (int i = 0;i < lin.getChildCount() - 1;i++) {
+            LinearLayout linH = (LinearLayout)lin.getChildAt(i);
+            EditText FormulaInput = (EditText)linH.getChildAt(0);
+            try {
+                Log.i("GetText", ""  + FormulaInput.getText().toString() + " size = " + FormulaInput.getText().toString().length());
+                FormulSistem.Calculate(FormulaInput.getText().toString(),0,1,0.2);
+                funcsWeDo.add(FormulaInput.getText().toString());
+
+                allCalculetblePoints.put(FormulaInput.getText().toString(),null);
+
+
+                constraintLayout.removeView(drawView);
+                constraintLayout.addView(drawView,0,constraintLayout.getLayoutParams());
+
+            }catch (Exception e){
+                Log.i("ERROROFSEX",e.getMessage());
+            }
+        }
+    }
+
+    void OnClickListnerRecurse(int index){
         LinearLayout lin = (LinearLayout)findViewById(R.id.formula_inputs_container);
         if (index >= lin.getChildCount()){return;}
         EditText FormulaInput = (EditText) lin.getChildAt(index);
-        formulaImputs.add(FormulaInput);
-            FormulaInput.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-                    if (index < lin.getChildCount()){
-                        addTextChangeListnerRecurse(index + 1);
+        FormulaInput.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int thisIndex = lin.indexOfChild(v);
+
+                if (thisIndex < lin.getChildCount()){
+                    OnClickListnerRecurse(thisIndex + 1);
+                }
+
+                EditText newFormulaInput = (EditText)lin.getChildAt(thisIndex);
+                Log.i("childCount","" + lin.getChildCount() + " i = " + thisIndex);
+                if (lin.getChildCount() <= thisIndex) {
+                    EditText formInpt = new EditText(newFormulaInput.getContext());
+                    formInpt.setBackground(newFormulaInput.getBackground());
+                    formInpt.setTextSize(newFormulaInput.getTextSize());
+                    formInpt.setTextColor(newFormulaInput.getCurrentTextColor());
+                    formInpt.setTextAlignment(newFormulaInput.getTextAlignment());
+
+
+                    funcsWeDo.add("");
+                    lin.addView(formInpt, newFormulaInput.getLayoutParams());
+                }
+
+
+                for (int i = 0;i < lin.getChildCount();i++){
+                    if (newFormulaInput.getText().toString().equals("") && i != lin.getChildCount()){
+                        lin.removeView(newFormulaInput);
                     }
                 }
 
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+        });
 
-                    Log.i("childCount","" + lin.getChildCount() + " i = " + index);
-                    if (lin.getChildCount() <= index + 1){
-                        EditText formInpt = new EditText(FormulaInput.getContext());
-                        formInpt.setBackground(FormulaInput.getBackground());
-                        formInpt.setTextSize(30);
-                        formInpt.setTextColor(FormulaInput.getCurrentTextColor());
-                        formInpt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
 
-                        funcsWeDo.add("");
-                        lin.addView(formInpt,FormulaInput.getLayoutParams());
-                    }
+//            Rec
 
-                }
 
-                @Override
-                public void afterTextChanged(Editable s) {
-                    if (FormulaInput.getText().toString().equals("")){
-                        lin.removeView(FormulaInput);
-                    }
-                }
-            });
+//        else
+
+
+
+//            R
     }
+
+//    void OnClickListnerRecurse(int index){
+//        LinearLayout lin = (LinearLayout)findViewById(R.id.formula_inputs_container);
+//        if (index >= lin.getChildCount()){return;}
+//        EditText FormulaInput = (EditText) lin.getChildAt(index);
+//
+//        FormulaInput.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//
+//
+//                int thisIndex = lin.indexOfChild(v);
+//                if (thisIndex < lin.getChildCount()){
+//                    OnClickListnerRecurse(thisIndex + 1);
+//                }
+//
+//                EditText newFormulaInput = (EditText)lin.getChildAt(thisIndex);
+//                Log.i("childCount","" + lin.getChildCount() + " i = " + index);
+//                if (lin.getChildCount() <= index + 1) {
+//                    EditText formInpt = new EditText(newFormulaInput.getContext());
+//                    formInpt.setBackground(newFormulaInput.getBackground());
+//                    formInpt.setTextSize(newFormulaInput.getTextSize());
+//                    formInpt.setTextColor(newFormulaInput.getCurrentTextColor());
+//                    formInpt.setTextAlignment(newFormulaInput.getTextAlignment());
+//
+//
+//                    funcsWeDo.add("");
+//                    lin.addView(formInpt, newFormulaInput.getLayoutParams());
+//                }
+//
+//
+//                if (FormulaInput.getText().toString().equals("") && index != lin.getChildCount()){
+//                    lin.removeView(newFormulaInput);
+//                }
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//
+//            }
+//        });
+//    }
+
 
     //Пока не нужные функции
     protected double[] XYMaxValues(){
@@ -679,9 +820,9 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
 
             Log.i("allCalculetblePoints","" + allCalculetblePoints.size() + "\nКЛЮЧИ = \t" + allCalculetblePoints.keySet().toString());
-            for (ArrayList<FormulSistem.Pair<Double,Double>> p : allCalculetblePoints.values()){
-                Log.i("calcPoints","" + p.size());
-            }
+//            for (ArrayList<FormulSistem.Pair<Double,Double>> p : allCalculetblePoints.values()){
+//                Log.i("calcPoints","" + p.size());
+//            }
 
             @SuppressLint("DrawAllocation") ArrayList<Path> paths = new ArrayList<>(funcCount);
 
