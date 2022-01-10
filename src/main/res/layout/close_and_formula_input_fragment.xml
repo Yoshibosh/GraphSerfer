@@ -10,14 +10,14 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="5dp"
         android:layout_weight="1"
+        android:padding="10dp"
 
 
         android:alpha="255"
-        android:background="@color/white"
+        android:background="@drawable/edittext_shadow"
         android:inputType="text"
-        android:text="@string/xVstepeni2"
+        android:text=""
         android:textAlignment="textStart"
         android:textColor="@color/DeepBrown"
         android:textSize="30sp"
@@ -26,12 +26,12 @@
     <ImageButton
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="5dp"
+        android:paddingBottom="5dp"
         android:layout_weight="6"
-        android:src="@drawable/close"
-        android:scaleType="fitCenter"
+        android:src="@drawable/ic_close_round_realvect"
+        android:scaleType="centerInside"
         android:visibility="visible"
-        android:background="@color/teal_700"
+        android:background="@drawable/close_btn_back"
         android:contentDescription="@string/todo"
         android:layout_gravity="end"
         />

@@ -110,7 +110,7 @@
                         android:id="@+id/ImageBtnCreate"
                         android:layout_width="70dp"
                         android:layout_height="70dp"
-                        android:src="@drawable/plus_round"
+                        android:src="@drawable/plus_round_vect"
                         android:scaleType="centerCrop"
                         android:background="@color/cardview_dark_background"
 

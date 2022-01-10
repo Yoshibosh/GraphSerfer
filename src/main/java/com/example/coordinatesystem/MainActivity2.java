@@ -4,8 +4,10 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.viewpager.widget.ViewPager;
 
 import android.annotation.SuppressLint;
@@ -30,6 +32,7 @@ import android.text.method.Touch;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -40,6 +43,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -85,6 +89,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
     double Cy = 1;
 
     boolean inTouch;
+    boolean isCloseFormInput = false;
 
     TouchForMove touch = null;
     ArrayList<TouchForMove> scaleTouches = new ArrayList<>();
@@ -135,7 +140,21 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         constraintLayout = findViewById(R.id.constraintLayoutActiv3);
 
         drawView = new DrawView(this);
+        drawView.setId(R.id.DrawLayout);
+        Button IOPFJQOIJCQOIYR = findViewById(R.id.DrawLayout);
+        constraintLayout.removeView(IOPFJQOIJCQOIYR);
         constraintLayout.addView(drawView,0,constraintLayout.getLayoutParams());
+
+
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int widthDisp = size.x;
+        int heightDisp = size.y;
+
+//        ConstraintLayout formInputContainer = (ConstraintLayout) findViewById(R.id.constraintLayoutActiv3IN);
+//        formInputContainer.setMaxHeight(heightDisp/2);
 
 
         XYmaxesAndMines.put("xMin",xMin);
@@ -157,8 +176,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
         Button build = findViewById(R.id.build);
         LinearLayout lin = (LinearLayout)findViewById(R.id.formula_inputs_container_container);
-        LinearLayout linH1 = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.close_and_formula_input_fragment,lin,false);
-        LinearLayout linH2 = (LinearLayout)findViewById(R.id.formula_inputs_container2);
 
 
 
@@ -203,50 +220,33 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
             newLinH.addView(create);
             lin.addView(newLinH);
+
+
         });
 
-//        formI.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//
-//            }
-//        });
+        ImageButton closeFormInput = (ImageButton)findViewById(R.id.close_open_formulas_input);
 
-//        formI.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                OnClickListnerRecurse(0);
-//            }
-//        });
+        closeFormInput.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isCloseFormInput = !isCloseFormInput;
+
+                ConstraintLayout formInputContainer = (ConstraintLayout) findViewById(R.id.constraintLayoutActiv3IN);
 
 
-//        EditText ed = (EditText) lin.getChildAt(0);
-//        ed.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//                OnClickListnerRecurse(0);
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//
-//            }
-//        });
+                if (isCloseFormInput){
+                    closeFormInput.setImageResource(R.drawable.open_formula_input);
 
+                    formInputContainer.setVisibility(View.GONE);
+
+                }else{
+                    closeFormInput.setImageResource(R.drawable.close_formula_input);
+
+                    formInputContainer.setVisibility(View.VISIBLE);
+                }
+
+            }
+        });
 
 
         constraintLayout.setOnTouchListener((v, event) -> {

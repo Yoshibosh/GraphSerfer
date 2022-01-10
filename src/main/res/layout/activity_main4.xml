@@ -9,6 +9,12 @@
     tools:context=".MainActivity2">
 
     <Button
+        android:id="@+id/DrawLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+    <Button
         android:id="@+id/build"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="132dp"
@@ -21,6 +27,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
+
+    <ImageButton
+        android:id="@+id/close_open_formulas_input"
+        android:layout_width="60dp"
+        android:background="@null"
+        android:layout_height="60dp"
+        android:scaleType="fitCenter"
+
+        android:src="@drawable/close_formula_input"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayoutActiv3IN"
+        app:layout_constraintEnd_toStartOf="@+id/build"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        android:contentDescription="TODO" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayoutActiv3IN"
@@ -40,13 +62,13 @@
             android:id="@+id/scrollView2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:alpha="255"
-            android:background="@color/cardview_dark_background"
-
             android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+
             android:layout_marginEnd="5dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginTop="5dp"
+            android:alpha="255"
+            android:background="@color/white"
 
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -56,27 +78,27 @@
             app:layout_constraintVertical_bias="0.0">
 
             <LinearLayout
+                android:id="@+id/formula_inputs_container_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:id="@+id/formula_inputs_container_container"
-                >
+                android:orientation="vertical">
+
                 <LinearLayout
+                    android:id="@+id/formula_inputs_container"
                     android:layout_width="match_parent"
                     android:layout_height="70dp"
-                    android:orientation="horizontal"
-                    android:id="@+id/formula_inputs_container">
+                    android:orientation="horizontal">
+
                     <EditText
                         android:id="@+id/FormulaInput"
-                        style="@style/Base.CardView"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginBottom="5dp"
-
-
                         android:alpha="255"
-                        android:background="@color/white"
+
+
+                        android:background="@drawable/close_btn_back"
                         android:inputType="text"
+                        android:padding="10dp"
                         android:text="@string/xVstepeni2"
                         android:textAlignment="textStart"
                         android:textColor="@color/DeepBrown"
@@ -86,25 +108,27 @@
 
                         />
                 </LinearLayout>
+
                 <LinearLayout
+                    android:id="@+id/formula_inputs_container2"
                     android:layout_width="match_parent"
                     android:layout_height="70dp"
-                    android:orientation="horizontal"
                     android:gravity="end"
-                    android:id="@+id/formula_inputs_container2">
+                    android:visibility="gone"
+                    android:orientation="horizontal">
 
                     <EditText
                         android:id="@+id/FormulaInput2"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginBottom="5dp"
                         android:layout_weight="1"
-
-
                         android:alpha="255"
-                        android:background="@color/white"
+
+
+                        android:background="@drawable/edittext_shadow"
                         android:inputType="text"
-                        android:text="@string/xVstepeni2"
+                        android:padding="10dp"
+                        android:text=""
                         android:textAlignment="textStart"
                         android:textColor="@color/DeepBrown"
                         android:textSize="30sp"
@@ -114,34 +138,41 @@
                         android:id="@+id/ImageBtnDestroy"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginBottom="5dp"
-                        android:layout_weight="6"
-                        android:src="@drawable/close"
-                        android:scaleType="fitCenter"
-                        android:visibility="visible"
-                        android:background="@color/white"
-                        android:contentDescription="@string/todo"
                         android:layout_gravity="end"
-                        />
+                        android:layout_weight="6"
+                        android:background="@drawable/close_btn_back"
+                        android:contentDescription="@string/todo"
+                        android:paddingBottom="5dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_close_round_realvect"
+                        android:visibility="visible" />
                 </LinearLayout>
+
                 <LinearLayout
+                    android:id="@+id/formula_inputs_container3"
                     android:layout_width="match_parent"
                     android:layout_height="70dp"
-                    android:orientation="horizontal"
                     android:gravity="end"
-                    android:id="@+id/formula_inputs_container3">
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:visibility="invisible" />
 
                     <ImageButton
                         android:id="@+id/ImageBtnCreate"
-                        android:layout_width="70dp"
-                        android:layout_height="70dp"
-                        android:src="@drawable/plus_round"
-                        android:scaleType="fitCenter"
-                        android:background="@color/cardview_dark_background"
-
-
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_gravity="end"
-                        android:contentDescription="@string/todo" />
+                        android:layout_weight="6"
+                        android:background="@null"
+                        android:contentDescription="@string/todo"
+
+
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_plus_round_real_vect" />
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>
