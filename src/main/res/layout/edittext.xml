@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EditText xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:layout_marginBottom="5dp"
+android:layout_weight="1"
+
+
+android:alpha="255"
+android:background="@color/white"
+android:inputType="text"
+android:text="@string/xVstepeni2"
+android:textAlignment="textStart"
+android:textColor="@color/DeepBrown"
+android:textSize="30sp"
+android:visibility="visible" />

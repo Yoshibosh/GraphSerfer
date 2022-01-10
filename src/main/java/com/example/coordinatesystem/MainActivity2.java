@@ -35,6 +35,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -156,7 +157,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
         Button build = findViewById(R.id.build);
         LinearLayout lin = (LinearLayout)findViewById(R.id.formula_inputs_container_container);
-        LinearLayout linH1 = (LinearLayout)findViewById(R.id.formula_inputs_container);
+        LinearLayout linH1 = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.close_and_formula_input_fragment,lin,false);
         LinearLayout linH2 = (LinearLayout)findViewById(R.id.formula_inputs_container2);
 
 
@@ -168,49 +169,40 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         ImageButton create = (ImageButton)findViewById(R.id.ImageBtnCreate);
         ImageButton close = (ImageButton)findViewById(R.id.ImageBtnDestroy);
 
+        close.setOnClickListener(v -> {
+            lin.removeViewAt(1);
+            RefreshDrawParametrs();
+        });
+
         Log.i("Create",create.toString());
 
         funcsWeDo.add(formI.getText().toString());
 
         create.setOnClickListener(v -> {
 
-            LinearLayout linH = (LinearLayout) lin.getChildAt(0);
-            EditText newFormulaInput = (EditText)linH.getChildAt(0);
-            EditText formInpt = new EditText(v.getContext());
 
-            linH = (LinearLayout) v.getParent();
+            LinearLayout linH = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.close_and_formula_input_fragment,lin,false);
 
-            formInpt.setBackground(newFormulaInput.getBackground());
-            formInpt.setTextSize(30);
-            formInpt.setTextColor(newFormulaInput.getCurrentTextColor());
-            formInpt.setTextAlignment(newFormulaInput.getTextAlignment());
+            EditText newFormulaInput = (EditText) linH.getChildAt(0);
 
-
-            ImageButton newClose = new ImageButton(v.getContext());
+            ImageButton newClose = (ImageButton) linH.getChildAt(1);
             newClose.setOnClickListener(v1 -> {
                 lin.removeView((View) v1.getParent());
                 RefreshDrawParametrs();
             });
 
-            linH.removeView(create);
-            linH.addView(formInpt,0,newFormulaInput.getLayoutParams());
-            linH.addView(newClose,close.getLayoutParams());
-//            linH.getChildAt(1).setBackgroundColor(getColor(R.color.white));
-//            linH.getChildAt(1).setVisibility(View.VISIBLE);
-//            ImageButton newclose =  (ImageButton) linH.getChildAt(1);
-//            newclose.setImageResource(R.drawable.close);
+            linH.removeAllViews();
+            linH = (LinearLayout) v.getParent();
 
-            funcsWeDo.add("");
+            linH.removeAllViews();
+            linH.addView(newFormulaInput,0);
+            linH.addView(newClose);
 
-
-
-            LinearLayout newLinH = new LinearLayout(linH.getContext());
-            newLinH.setOrientation(LinearLayout.HORIZONTAL);
-            newLinH.setGravity(Gravity.END);
+            LinearLayout newLinH = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.create_button_fragment,lin,false);
 
 
             newLinH.addView(create);
-            lin.addView(newLinH,linH.getLayoutParams());
+            lin.addView(newLinH);
         });
 
 //        formI.addTextChangedListener(new TextWatcher() {
