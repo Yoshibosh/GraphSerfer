@@ -23,6 +23,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -106,6 +107,9 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
     int touchCounter = 0;
 
+    ArrayList<Pair<Integer,ImageButton>> colors = new ArrayList<>();
+    int colorNow = Color.RED;
+
     static class TouchForMove{
         int id;
         double xStart = 0;
@@ -153,8 +157,9 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         int widthDisp = size.x;
         int heightDisp = size.y;
 
-//        ConstraintLayout formInputContainer = (ConstraintLayout) findViewById(R.id.constraintLayoutActiv3IN);
-//        formInputContainer.setMaxHeight(heightDisp/2);
+        ConstraintLayout formInputContainer = (ConstraintLayout) findViewById(R.id.constraintLayoutActiv3IN);
+        formInputContainer.setMaxHeight(heightDisp/2);
+        formInputContainer.setMinHeight(heightDisp/2);
 
 
         XYmaxesAndMines.put("xMin",xMin);
@@ -177,11 +182,26 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         Button build = findViewById(R.id.build);
         LinearLayout lin = (LinearLayout)findViewById(R.id.formula_inputs_container_container);
 
-
-
-        formulaImputs.add(new Pair<>(findViewById(R.id.FormulaInput),0));
-
         EditText formI = (EditText)findViewById(R.id.FormulaInput);
+        ImageButton firstColorChanger = (ImageButton)findViewById(R.id.first_color_btn);
+
+        firstColorChanger.setBackgroundColor(Color.RED);
+
+        colors.add(new Pair<>(firstColorChanger.getDrawingCacheBackgroundColor(),firstColorChanger));
+
+        firstColorChanger.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                colorNow += 100;
+                colors.remove(0);
+                colors.add(new Pair<>(colorNow,(ImageButton) v));
+
+                for (Pair<Integer,ImageButton> p : colors){
+                    p.second.setBackgroundColor(p.first);
+                }
+            }
+        });
+
 
         ImageButton create = (ImageButton)findViewById(R.id.ImageBtnCreate);
         ImageButton close = (ImageButton)findViewById(R.id.ImageBtnDestroy);
@@ -858,12 +878,12 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             p.setStrokeWidth(3);
             p.setStyle(Paint.Style.STROKE);
 
+            int indexChisto = 0;
             for (Path path : paths){
+                p.setColor(colors.get(indexChisto++).first);
+                Log.i("Nigga","" +colors.get(indexChisto - 1).first + "Jopa = " + colors.get(indexChisto - 1).second.getDrawingCacheBackgroundColor());
                 canvas.drawPath(path,p);
             }
-
-            p.setStyle(Paint.Style.STROKE);
-//            canvas.drawLines(pointsf,p);
 
         }
 

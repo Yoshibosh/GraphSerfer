@@ -29,7 +29,7 @@
         android:paddingBottom="5dp"
         android:layout_weight="6"
         android:src="@drawable/ic_close_round_realvect"
-        android:scaleType="centerInside"
+        android:scaleType="fitEnd"
         android:visibility="visible"
         android:background="@drawable/close_btn_back"
         android:contentDescription="@string/todo"
