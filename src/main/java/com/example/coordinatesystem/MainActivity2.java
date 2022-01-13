@@ -1,10 +1,15 @@
 package com.example.coordinatesystem;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.ColorRes;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.graphics.drawable.DrawableWrapper;
+import androidx.constraintlayout.helper.widget.Layer;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.core.content.res.ConfigurationHelper;
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.AndroidViewModel;
@@ -14,18 +19,28 @@ import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.AssetManager;
+import android.content.res.ColorStateList;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.DrawableContainer;
+import android.graphics.drawable.LayerDrawable;
 import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.CalendarContract;
 import android.text.Editable;
 import android.text.Layout;
 import android.text.TextWatcher;
@@ -43,11 +58,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+
+import com.google.android.material.tabs.TabLayout;
 
 import java.text.Normalizer;
 import java.text.NumberFormat;
@@ -58,6 +76,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Stream;
 
 public class MainActivity2 extends AppCompatActivity implements View.OnTouchListener {
@@ -107,8 +126,17 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
     int touchCounter = 0;
 
+
+//  Colors
     ArrayList<Pair<Integer,ImageButton>> colors = new ArrayList<>();
     int colorNow = Color.RED;
+    LinearLayout colorChangeMenu;
+    ImageButton currentViewColorChange;
+    HashMap<String,Integer> colorRGB = new HashMap<>();
+    int currentIndexOfChangeColorBtn = 0;
+
+    LayerDrawable curLayerToChange;
+
 
     static class TouchForMove{
         int id;
@@ -133,6 +161,23 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         }
     }
 
+
+    ImageButton closeFormInput;
+
+    @Override
+    public void onBackPressed() {
+
+        isCloseFormInput = true;
+        Log.i("Norm","norm");
+
+        ConstraintLayout formInputContainer1 = (ConstraintLayout) findViewById(R.id.constraintLayoutActiv3IN);
+
+        closeFormInput.setImageResource(R.drawable.open_formula_input);
+
+        formInputContainer1.setVisibility(View.GONE);
+
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -148,6 +193,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         Button IOPFJQOIJCQOIYR = findViewById(R.id.DrawLayout);
         constraintLayout.removeView(IOPFJQOIJCQOIYR);
         constraintLayout.addView(drawView,0,constraintLayout.getLayoutParams());
+
+        colorChangeMenu = (LinearLayout) findViewById(R.id.change_color_menu);
 
 
 
@@ -166,18 +213,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         XYmaxesAndMines.put("xMax",xMax);
         XYmaxesAndMines.put("yMin",yMin);
         XYmaxesAndMines.put("yMax",yMax);
-//        @SuppressLint("ResourceType") View editText = LayoutInflater.from(this).inflate(R.id.FormulaInput,null);
-
-
-//        for (int i = 0;i < imageButtons.size();i++){
-//            imageButtons.get(i).setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    constraintLayout.removeView(v);
-//                    constraintLayout.addView(editText,v.getId(),v.getLayoutParams());
-//                }
-//            });
-//        }
 
         Button build = findViewById(R.id.build);
         LinearLayout lin = (LinearLayout)findViewById(R.id.formula_inputs_container_container);
@@ -185,22 +220,86 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         EditText formI = (EditText)findViewById(R.id.FormulaInput);
         ImageButton firstColorChanger = (ImageButton)findViewById(R.id.first_color_btn);
 
-        firstColorChanger.setBackgroundColor(Color.RED);
-
         colors.add(new Pair<>(firstColorChanger.getDrawingCacheBackgroundColor(),firstColorChanger));
+
+
+
+        colorRGB.put("RED",0);
+        colorRGB.put("GREEN",0);
+        colorRGB.put("BLUE",0);
+
+
+
+
+//        constraintLayout.removeView(forChangeColor);
+
 
         firstColorChanger.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                colorNow += 100;
-                colors.remove(0);
-                colors.add(new Pair<>(colorNow,(ImageButton) v));
 
-                for (Pair<Integer,ImageButton> p : colors){
-                    p.second.setBackgroundColor(p.first);
+                if (colorChangeMenu.getVisibility() == View.VISIBLE){
+                    colorChangeMenu.setVisibility(View.GONE);
+                    return;
                 }
+
+                currentViewColorChange = (ImageButton) v;
+
+                ImageView colorView = (ImageView) colorChangeMenu.getChildAt(3);
+
+                for (int i = 0;i < colors.size();i++){
+                    Pair<Integer,ImageButton> p = colors.get(i);
+                    if (p.second.equals(v)){
+                        colorNow = p.first;
+                        currentIndexOfChangeColorBtn = i;
+                    }
+                }
+                colorChangeMenu.setVisibility(View.VISIBLE);
+
+                colorView.setBackgroundColor(colorNow);
             }
         });
+
+
+        for (int i = 0;i < colorChangeMenu.getChildCount() - 1;i++){
+            SeekBar seekBar = (SeekBar) colorChangeMenu.getChildAt(i);
+            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    switch (seekBar.getId()){
+                        case R.id.first_seek_bar_in_change_color_menu:
+                            colorRGB.put("RED",progress);
+                            break;
+                        case R.id.second_seek_bar_in_change_color_menu:
+                            colorRGB.put("GREEN",progress);
+                            break;
+                        case R.id.third_seek_bar_in_change_color_menu:
+                            colorRGB.put("BLUE",progress);
+                            break;
+                    }
+                    colorNow = Color.rgb(colorRGB.get("RED"),colorRGB.get("GREEN"),colorRGB.get("BLUE"));
+                    colorChangeMenu.getChildAt(3).setBackgroundColor(colorNow);
+
+
+                    ImageButton curBtn = colors.get(currentIndexOfChangeColorBtn).second;
+                    curBtn.setBackgroundColor(colorNow);
+
+                    colors.remove(currentIndexOfChangeColorBtn);
+                    colors.add(currentIndexOfChangeColorBtn,new Pair<>(colorNow,curBtn));
+//                    colors.get(currentIndexOfChangeColorBtn).second.setBackgroundColor(colorNow);
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+            });
+        }
 
 
         ImageButton create = (ImageButton)findViewById(R.id.ImageBtnCreate);
@@ -222,18 +321,51 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
             EditText newFormulaInput = (EditText) linH.getChildAt(0);
 
-            ImageButton newClose = (ImageButton) linH.getChildAt(1);
+            ImageButton newClose = (ImageButton) linH.getChildAt(2);
             newClose.setOnClickListener(v1 -> {
+                colors.remove(lin.indexOfChild((View) v1.getParent()) - 1);
                 lin.removeView((View) v1.getParent());
                 RefreshDrawParametrs();
             });
+
+            ImageButton newColorChange = (ImageButton) linH.getChildAt(1);
+
+
+            newColorChange.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (colorChangeMenu.getVisibility() == View.VISIBLE){
+                        colorChangeMenu.setVisibility(View.GONE);
+                        return;
+                    }
+
+                    currentViewColorChange = (ImageButton) v;
+
+                    ImageView colorView = (ImageView) colorChangeMenu.getChildAt(3);
+
+                    for (int i = 0;i < colors.size();i++){
+                        Pair<Integer,ImageButton> p = colors.get(i);
+                        if (p.second.equals(v)){
+                            colorNow = p.first;
+                            currentIndexOfChangeColorBtn = i;
+                        }
+                    }
+                    colorChangeMenu.setVisibility(View.VISIBLE);
+
+                    colorView.setBackgroundColor(colorNow);
+                }
+            });
+            Random random = new Random();
+            colors.add(new Pair<>(random.nextInt(),newColorChange));
 
             linH.removeAllViews();
             linH = (LinearLayout) v.getParent();
 
             linH.removeAllViews();
             linH.addView(newFormulaInput,0);
+            linH.addView(newColorChange);
             linH.addView(newClose);
+            linH.setBackgroundResource(R.drawable.edittext_shadow);
 
             LinearLayout newLinH = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.create_button_fragment,lin,false);
 
@@ -244,32 +376,38 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
         });
 
-        ImageButton closeFormInput = (ImageButton)findViewById(R.id.close_open_formulas_input);
+        closeFormInput = (ImageButton)findViewById(R.id.close_open_formulas_input);
+        closeFormInput.setOnClickListener(v -> {
+            isCloseFormInput = !isCloseFormInput;
 
-        closeFormInput.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isCloseFormInput = !isCloseFormInput;
-
-                ConstraintLayout formInputContainer = (ConstraintLayout) findViewById(R.id.constraintLayoutActiv3IN);
+            ConstraintLayout formInputContainer1 = (ConstraintLayout) findViewById(R.id.constraintLayoutActiv3IN);
 
 
-                if (isCloseFormInput){
-                    closeFormInput.setImageResource(R.drawable.open_formula_input);
+            if (isCloseFormInput){
+                closeFormInput.setImageResource(R.drawable.open_formula_input);
 
-                    formInputContainer.setVisibility(View.GONE);
+                formInputContainer1.setVisibility(View.GONE);
 
-                }else{
-                    closeFormInput.setImageResource(R.drawable.close_formula_input);
+            }else{
+                closeFormInput.setImageResource(R.drawable.close_formula_input);
 
-                    formInputContainer.setVisibility(View.VISIBLE);
-                }
-
+                formInputContainer1.setVisibility(View.VISIBLE);
             }
+
         });
 
 
+        ScrollView scrollView = (ScrollView) formInputContainer.getChildAt(0);
+       scrollView.setOnTouchListener(new View.OnTouchListener() {
+           @Override
+           public boolean onTouch(View v, MotionEvent event) {
+
+               colorChangeMenu.setVisibility(View.GONE);
+               return false;
+           }
+       });
         constraintLayout.setOnTouchListener((v, event) -> {
+
 
             int width = v.getWidth();
             int height = v.getHeight();
@@ -436,101 +574,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         }
     }
 
-    void OnClickListnerRecurse(int index){
-        LinearLayout lin = (LinearLayout)findViewById(R.id.formula_inputs_container);
-        if (index >= lin.getChildCount()){return;}
-        EditText FormulaInput = (EditText) lin.getChildAt(index);
-
-        FormulaInput.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int thisIndex = lin.indexOfChild(v);
-
-                if (thisIndex < lin.getChildCount()){
-                    OnClickListnerRecurse(thisIndex + 1);
-                }
-
-                EditText newFormulaInput = (EditText)lin.getChildAt(thisIndex);
-                Log.i("childCount","" + lin.getChildCount() + " i = " + thisIndex);
-                if (lin.getChildCount() <= thisIndex) {
-                    EditText formInpt = new EditText(newFormulaInput.getContext());
-                    formInpt.setBackground(newFormulaInput.getBackground());
-                    formInpt.setTextSize(newFormulaInput.getTextSize());
-                    formInpt.setTextColor(newFormulaInput.getCurrentTextColor());
-                    formInpt.setTextAlignment(newFormulaInput.getTextAlignment());
-
-
-                    funcsWeDo.add("");
-                    lin.addView(formInpt, newFormulaInput.getLayoutParams());
-                }
-
-
-                for (int i = 0;i < lin.getChildCount();i++){
-                    if (newFormulaInput.getText().toString().equals("") && i != lin.getChildCount()){
-                        lin.removeView(newFormulaInput);
-                    }
-                }
-
-            }
-        });
-
-
-//            Rec
-
-
-//        else
-
-
-
-//            R
-    }
-
-//    void OnClickListnerRecurse(int index){
-//        LinearLayout lin = (LinearLayout)findViewById(R.id.formula_inputs_container);
-//        if (index >= lin.getChildCount()){return;}
-//        EditText FormulaInput = (EditText) lin.getChildAt(index);
-//
-//        FormulaInput.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//
-//
-//                int thisIndex = lin.indexOfChild(v);
-//                if (thisIndex < lin.getChildCount()){
-//                    OnClickListnerRecurse(thisIndex + 1);
-//                }
-//
-//                EditText newFormulaInput = (EditText)lin.getChildAt(thisIndex);
-//                Log.i("childCount","" + lin.getChildCount() + " i = " + index);
-//                if (lin.getChildCount() <= index + 1) {
-//                    EditText formInpt = new EditText(newFormulaInput.getContext());
-//                    formInpt.setBackground(newFormulaInput.getBackground());
-//                    formInpt.setTextSize(newFormulaInput.getTextSize());
-//                    formInpt.setTextColor(newFormulaInput.getCurrentTextColor());
-//                    formInpt.setTextAlignment(newFormulaInput.getTextAlignment());
-//
-//
-//                    funcsWeDo.add("");
-//                    lin.addView(formInpt, newFormulaInput.getLayoutParams());
-//                }
-//
-//
-//                if (FormulaInput.getText().toString().equals("") && index != lin.getChildCount()){
-//                    lin.removeView(newFormulaInput);
-//                }
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//
-//            }
-//        });
-//    }
 
 
     //Пока не нужные функции
