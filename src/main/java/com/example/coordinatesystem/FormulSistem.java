@@ -236,7 +236,7 @@ public class FormulSistem{
         }
         return false;
     }
-    static Boolean haveElements(String[] mass, String element){
+    public static Boolean haveElements(String[] mass, String element){
         for (String i : mass){
             if (i.equals(element)) return true;
         }
@@ -337,7 +337,7 @@ public class FormulSistem{
             }else{
                 double arg = Unfolding(f.arg, x);
 
-                if (!haveElements(supportedFuncs, f.name)){throw new Exception(f.name + " <- This func not supported");}
+//                if (!haveElements(supportedFuncs, f.name)){throw new Exception(f.name + " <- This func not supported");}
 
                 switch (f.name){
                     case "lg":
@@ -351,18 +351,22 @@ public class FormulSistem{
                         return Math.sin(arg);
                     case "f":
                         return arg;
+                    case "tg":
+                        return Math.tan(arg);
+                    case "ctg":
+                        return 1/Math.tan(arg);
                     case "abs":
                         return Math.abs(arg);
-                    case "arccos":
+                    case "acos":
                         return Math.acos(arg);
-                    case "arcsin":
+                    case "asin":
                         return Math.asin(arg);
-                    case "arctg":
+                    case "atg":
                         return Math.atan(arg);
-                    case "arcctg":
+                    case "actg":
                         return 1/Math.atan(arg);
                     default:
-                        throw new Exception(f.name + "This func not supported");
+                        throw new Exception(f.name + "() <- This func not supported");
                 }
             }
         }else if (func.getClass().equals(Binop2.class)){

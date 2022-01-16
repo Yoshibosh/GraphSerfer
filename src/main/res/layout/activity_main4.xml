@@ -15,35 +15,51 @@
         android:layout_height="match_parent"
         android:visibility="gone"/>
 
-    <Button
-        android:id="@+id/build"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:layout_width="132dp"
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:text="@string/BuildTheGrath"
-        android:visibility="visible"
+        android:background="@drawable/create_btn_back"
         app:layout_constraintBottom_toTopOf="@+id/constraintLayoutActiv3IN"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        tools:layout_editor_absoluteX="65dp">
 
-    <ImageButton
-        android:id="@+id/close_open_formulas_input"
-        android:layout_width="60dp"
-        android:background="@null"
-        android:layout_height="60dp"
-        android:scaleType="fitCenter"
+        <Button
+            android:id="@+id/build"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="132dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:text="@string/BuildTheGrath"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
 
-        android:src="@drawable/close_formula_input"
-        app:layout_constraintBottom_toTopOf="@+id/constraintLayoutActiv3IN"
-        app:layout_constraintEnd_toStartOf="@+id/build"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0"
-        android:contentDescription="TODO" />
+        <ImageButton
+            android:id="@+id/close_open_formulas_input"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+
+            android:background="@null"
+            android:contentDescription="@string/todo"
+            android:padding="10dp"
+            android:scaleType="fitStart"
+            android:src="@drawable/close_formula_input"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/build"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayoutActiv3IN"
@@ -55,7 +71,9 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0"
         tools:context=".MainActivity2"
-        tools:layout_editor_absoluteX="0dp">
+        tools:layout_editor_absoluteX="0dp"
+        android:visibility="visible"
+        >
 
 
         <ScrollView
@@ -69,7 +87,7 @@
             android:layout_marginEnd="5dp"
             android:layout_marginBottom="5dp"
             android:alpha="255"
-            android:background="@color/white"
+            android:background="@color/Dimchato_beliy"
 
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -95,20 +113,20 @@
                         android:id="@+id/FormulaInput"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:alpha="255"
+                        android:layout_marginBottom="5dp"
                         android:layout_weight="1"
 
 
-                        android:background="@color/white"
+                        android:alpha="255"
+                        android:background="@color/Dimchato_beliy"
                         android:inputType="text"
                         android:padding="10dp"
                         android:text="@string/xVstepeni2"
                         android:textAlignment="textStart"
                         android:textColor="@color/DeepBrown"
                         android:textSize="30sp"
-                        android:visibility="visible"
 
-                        android:layout_marginBottom="5dp"
+                        android:visibility="visible"
 
                         />
 
@@ -246,6 +264,207 @@
             android:layout_weight="2"
             android:background="@color/black"
             android:layout_margin="5dp"/>
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:background="@null"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+
+        app:layout_constraintVertical_bias="1.0">
+
+        <ImageButton
+            android:id="@+id/upBtn"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.321"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.096" />
+
+        <ImageButton
+            android:id="@+id/downBtn"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.321"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/upBtn"
+            app:layout_constraintVertical_bias="0.785" />
+
+        <ImageButton
+            android:id="@+id/rightBtn"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.643"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.492" />
+
+        <ImageButton
+            android:id="@+id/leftBtn"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/rightBtn"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.496" />
+
+        <SeekBar
+            android:id="@+id/speedSeekBar"
+            android:layout_width="213dp"
+            android:layout_height="98dp"
+            app:layout_constraintBottom_toTopOf="@+id/rightBtn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/upBtn"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            android:background="@drawable/formul_keybord_btn_back"
+            android:max="20"/>
+
+        <SeekBar
+            android:id="@+id/radiusSeekBar"
+            android:layout_width="213dp"
+            android:layout_height="98dp"
+            android:layout_marginTop="29dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/upBtn"
+            app:layout_constraintTop_toBottomOf="@+id/rightBtn"
+            app:layout_constraintVertical_bias="1.0"
+            android:background="@drawable/formul_keybord_btn_back"
+            android:max="20"/>
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/cameraFollowsPlayer"
+            android:src="@color/white"
+            android:scaleType="fitStart"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:layout_constraintBottom_toTopOf="@+id/leftBtn"
+            app:layout_constraintEnd_toStartOf="@+id/upBtn"
+            app:layout_constraintStart_toStartOf="parent" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:background="@color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+
+        app:layout_constraintVertical_bias="1.0"
+
+        android:orientation="vertical"
+
+        android:visibility="gone"
+        >
+
+        <TextView
+            android:id="@+id/outText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:text="@string/cos"
+            android:textAlignment="viewStart"
+            android:textSize="15pt"
+            android:padding="10dp"
+            android:textIsSelectable="true"
+            />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="@color/white"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toTopOf="parent"
+
+            >
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/cosBtn"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textColor="@color/black"
+                android:background="@drawable/formul_keybord_btn_back"
+                android:textAllCaps="false"
+                android:text="@string/cos"
+                android:textSize="10pt"
+                />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/sinBtn"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textColor="@color/black"
+                android:background="@drawable/formul_keybord_btn_back"
+                android:textAllCaps="false"
+                android:textSize="10pt"
+                android:text="@string/sin" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/tgBtn"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textColor="@color/black"
+                android:background="@drawable/formul_keybord_btn_back"
+                android:text="@string/tgx"
+                android:textAllCaps="false"
+                android:textSize="10pt"
+                />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/ctgBtn"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textColor="@color/black"
+                android:background="@drawable/formul_keybord_btn_back"
+                android:text="@string/ctg_x"
+                android:textAllCaps="false"
+                android:textSize="10pt"
+                />
+
+
+        </LinearLayout>
+
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/spaceBtn"
+
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:backgroundTint="@color/white"
+            />
+
+
 
     </LinearLayout>
 

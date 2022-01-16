@@ -29,4 +29,6 @@
     <string name="StartCenaDelXY">1</string>
     <string name="xVstepeni2">x^2</string>
     <string name="todo">TODO</string>
+    <string name="tgx">tg(x)</string>
+    <string name="ctg_x">ctg(x)</string>
 </resources>

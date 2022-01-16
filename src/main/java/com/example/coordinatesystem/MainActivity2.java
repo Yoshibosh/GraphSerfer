@@ -90,6 +90,9 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
     double yMin = -5;
     double yMax = 5;
 
+    int height = 0;
+    int width = 0;
+
     double lastXmax;
     double lastXmin;
     double lastYmax;
@@ -160,6 +163,21 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             this.lastYMovePos = yStart;
         }
     }
+
+
+    int cursorPosition;
+    String textString = "";
+    TextView outText;
+
+
+    PointF playerPos = new PointF();
+    float speed = 0.01f;
+    int koefX;
+    int koefY;
+    float radiusOfP = 1000.0f;
+
+    boolean cameraFollowPlayer = false;
+
 
 
     ImageButton closeFormInput;
@@ -529,10 +547,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
                         constraintLayout.removeView(drawView);
                         constraintLayout.addView(drawView,0,constraintLayout.getLayoutParams());
-//                        if (sumDiff >= (width+height)/40){
-//                            constraintLayout.removeView(drawView);
-//                            constraintLayout.addView(drawView,constraintLayout.getLayoutParams());
-//                        }
+
                         touch.lastXMovePos = event.getX();
                     }
                     break;
@@ -546,7 +561,198 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
         build.setOnClickListener(v -> RefreshDrawParametrs());
 
+
+
+        ImageButton upBtn = findViewById(R.id.upBtn);
+        ImageButton downBtn = findViewById(R.id.downBtn);
+        ImageButton rightBtn = findViewById(R.id.rightBtn);
+        ImageButton leftBtn = findViewById(R.id.leftBtn);
+
+        upBtn.setOnTouchListener((v, event) -> {
+
+            int action = event.getAction();
+
+            if (action == MotionEvent.ACTION_DOWN){
+                koefY = -1;
+            }else if
+            (action == MotionEvent.ACTION_UP){
+                koefY = 0;
+            }
+            return false;
+        });
+        downBtn.setOnTouchListener((v, event) -> {
+
+            int action = event.getAction();
+
+            if (action == MotionEvent.ACTION_DOWN){
+                koefY = 1;
+            }else if
+            (action == MotionEvent.ACTION_UP){
+                koefY = 0;
+            }
+            return false;
+        });
+        rightBtn.setOnTouchListener((v, event) -> {
+
+            int action = event.getAction();
+
+            if (action == MotionEvent.ACTION_DOWN){
+                koefX = 1;
+            }else if
+            (action == MotionEvent.ACTION_UP){
+                koefX = 0;
+            }
+            return false;
+        });
+        leftBtn.setOnTouchListener((v, event) -> {
+
+            int action = event.getAction();
+
+            if (action == MotionEvent.ACTION_DOWN){
+                koefX = -1;
+            }else if
+            (action == MotionEvent.ACTION_UP){
+                koefX = 0;
+            }
+            return false;
+        });
+
+                Thread t = new Thread() {
+
+            @Override
+            public void run() {
+                while (!isInterrupted()) {
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            if (koefX != 0 || koefY != 0){
+                                playerPos.x += koefX * speed;
+                                playerPos.y += koefY * speed;
+                                RefreshDrawParametrs();
+                            }
+
+                            if (cameraFollowPlayer){
+                                xMin = (double)playerPos.x - (xMax - xMin)/2.0;
+                                xMax = (double)playerPos.x + (xMax - xMin)/2.0;
+                                yMin = (double)-playerPos.y - (yMax - yMin)/2.0;
+                                yMax = (double)-playerPos.y + (yMax - yMin)/2.0;
+                                RefreshDrawParametrs();
+                            }
+                        }
+                    });
+                }
+            }
+        };
+
+        t.start();
+
+        SeekBar speedSeekBar = findViewById(R.id.speedSeekBar);
+        SeekBar radiusSeekBar = findViewById(R.id.radiusSeekBar);
+        speedSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                speed = (float)Math.pow(10,-speedSeekBar.getProgress());
+                RefreshDrawParametrs();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        radiusSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                radiusOfP = (float)Math.pow(2,radiusSeekBar.getProgress());
+                RefreshDrawParametrs();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        ImageButton cameraFollowsPlayer = findViewById(R.id.cameraFollowsPlayer);
+        cameraFollowsPlayer.setOnClickListener(v -> {
+            cameraFollowPlayer = !cameraFollowPlayer;
+        });
+
+//        outText = findViewById(R.id.outText);
+//        Button cosBtn = findViewById(R.id.cosBtn);
+//        Button sinBtn = findViewById(R.id.sinBtn);
+//        Button tgBtn = findViewById(R.id.tgBtn);
+//        Button ctgBtn = findViewById(R.id.ctgBtn);
+//        ImageButton spaceBtn = findViewById(R.id.spaceBtn);
+//
+////        Thread t = new Thread() {
+////
+////            @Override
+////            public void run() {
+////                while (!isInterrupted()) {
+////                    try {
+////                        Thread.sleep(10);
+////                    } catch (InterruptedException e) {
+////                        e.printStackTrace();
+////                    }
+////                    runOnUiThread(new Runnable() {
+////                        @Override
+////                        public void run() {
+////                            outText.setText(textString);
+////                        }
+////                    });
+////                }
+////            }
+////        };
+////
+////        t.start();
+//
+//
+//        outText.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                return false;
+//            }
+//        });
+//
+//        cosBtn.setOnClickListener(v -> {
+//            textString = textString.substring(0,cursorPosition) + "cos()" + textString.substring(cursorPosition);
+//        });
+//        sinBtn.setOnClickListener(v -> {
+//            textString = textString.substring(0,cursorPosition) + "sin()" + textString.substring(cursorPosition);
+//        });
+//        tgBtn.setOnClickListener(v -> {
+//            textString = textString.substring(0,cursorPosition) + "tg()" + textString.substring(cursorPosition);
+//        });
+//        ctgBtn.setOnClickListener(v -> {
+//            textString = textString.substring(0,cursorPosition) + "ctg()" + textString.substring(cursorPosition);
+//        });
+//        spaceBtn.setOnClickListener(v ->{
+//            textString = textString.substring(0,cursorPosition) + " " + textString.substring(cursorPosition);
+//        });
+
+
+
 //        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+
     }
 
 
@@ -658,8 +864,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             p.setAntiAlias(true);
 
             //Высота и ширина экрана
-            int width = getWidth();
-            int height = getHeight();
+            width = getWidth();
+            height = getHeight();
 
             Log.i("funcsweDo",funcsWeDo.toString() + " " + funcsWeDo.size());
 
@@ -927,6 +1133,18 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                 Log.i("Nigga","" +colors.get(indexChisto - 1).first + "Jopa = " + colors.get(indexChisto - 1).second.getDrawingCacheBackgroundColor());
                 canvas.drawPath(path,p);
             }
+            p.setColor(Color.RED);
+            p.setStyle(Paint.Style.STROKE);
+            float radius = (float)Math.log(radiusOfP);
+
+            float xOfPlayer = playerPos.x*(float)xMult + (float)xCentre;
+            float yOfPlayer = playerPos.y*(float)yMult + (float)yCentre;
+//            canvas.drawCircle(xOfPlayer,yOfPlayer,radius,p);
+
+//            canvas.drawPath(circleOfLife,p);
+            canvas.drawRect(xOfPlayer,yOfPlayer,xOfPlayer + radius*(float)xMult,yOfPlayer + radius*(float)yMult,p);
+
+            Log.i("playerPos","y = " + yOfPlayer + " x = " + xOfPlayer + "radius = " + radius);
 
         }
 
