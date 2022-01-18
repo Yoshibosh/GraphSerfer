@@ -81,20 +81,12 @@
             android:id="@+id/scrollView2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="5dp"
-            android:layout_marginTop="5dp"
 
-            android:layout_marginEnd="5dp"
-            android:layout_marginBottom="5dp"
             android:alpha="255"
             android:background="@color/Dimchato_beliy"
 
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0">
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="16dp">
 
             <LinearLayout
                 android:id="@+id/formula_inputs_container_container"
@@ -106,8 +98,8 @@
                     android:id="@+id/formula_inputs_container"
                     android:layout_width="match_parent"
                     android:layout_height="70dp"
-                    android:orientation="horizontal"
-                    android:background="@drawable/edittext_shadow">
+                    android:background="@drawable/edittext_shadow"
+                    android:orientation="horizontal">
 
                     <EditText
                         android:id="@+id/FormulaInput"
@@ -134,11 +126,10 @@
                         android:id="@+id/first_color_btn"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_weight="6"
-                        android:background="@color/purple_500"
-
                         android:layout_marginBottom="5dp"
-                        />
+                        android:layout_weight="6"
+
+                        android:background="@color/purple_500" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -146,8 +137,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="70dp"
                     android:gravity="end"
-                    android:visibility="gone"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:visibility="gone">
 
                     <EditText
                         android:id="@+id/FormulaInput2"
@@ -208,9 +199,6 @@
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>
-
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -276,7 +264,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
 
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintVertical_bias="1.0"
+
+        android:visibility="gone"
+        >
 
         <ImageButton
             android:id="@+id/upBtn"
@@ -335,19 +326,7 @@
             android:background="@drawable/formul_keybord_btn_back"
             android:max="20"/>
 
-        <SeekBar
-            android:id="@+id/radiusSeekBar"
-            android:layout_width="213dp"
-            android:layout_height="98dp"
-            android:layout_marginTop="29dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/upBtn"
-            app:layout_constraintTop_toBottomOf="@+id/rightBtn"
-            app:layout_constraintVertical_bias="1.0"
-            android:background="@drawable/formul_keybord_btn_back"
-            android:max="20"/>
+
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/cameraFollowsPlayer"
@@ -361,6 +340,8 @@
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
 
     <LinearLayout
@@ -467,6 +448,19 @@
 
 
     </LinearLayout>
+
+    <SeekBar
+        android:id="@+id/radiusSeekBar"
+        android:layout_width="213dp"
+        android:layout_height="98dp"
+        android:background="@drawable/formul_keybord_btn_back"
+        android:max="20"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintVertical_bias="1.0"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

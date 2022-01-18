@@ -77,6 +77,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Vector;
 import java.util.stream.Stream;
 
 public class MainActivity2 extends AppCompatActivity implements View.OnTouchListener {
@@ -92,6 +93,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
     int height = 0;
     int width = 0;
+
+    double step;
 
     double lastXmax;
     double lastXmin;
@@ -129,6 +132,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
     int touchCounter = 0;
 
+    ArrayList<Object2D> _2Dobjects = new ArrayList<>();
 
 //  Colors
     ArrayList<Pair<Integer,ImageButton>> colors = new ArrayList<>();
@@ -630,11 +634,12 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            RefreshDrawParametrs();
 
                             if (koefX != 0 || koefY != 0){
                                 playerPos.x += koefX * speed;
                                 playerPos.y += koefY * speed;
-                                RefreshDrawParametrs();
+//                                RefreshDrawParametrs();
                             }
 
                             if (cameraFollowPlayer){
@@ -642,7 +647,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                                 xMax = (double)playerPos.x + (xMax - xMin)/2.0;
                                 yMin = (double)-playerPos.y - (yMax - yMin)/2.0;
                                 yMax = (double)-playerPos.y + (yMax - yMin)/2.0;
-                                RefreshDrawParametrs();
+//                                RefreshDrawParametrs();
                             }
                         }
                     });
@@ -675,7 +680,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         radiusSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                radiusOfP = (float)Math.pow(2,radiusSeekBar.getProgress());
+                radiusOfP = (float)radiusSeekBar.getProgress()/10;
                 RefreshDrawParametrs();
             }
 
@@ -694,6 +699,18 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         cameraFollowsPlayer.setOnClickListener(v -> {
             cameraFollowPlayer = !cameraFollowPlayer;
         });
+
+
+
+
+
+        _2Dobjects.add(new Rect2D(-2,0,2));
+        _2Dobjects.get(0).setSpeed(new MyVector2D(0.001f,0.002f));
+        _2Dobjects.get(0).setMass(10);
+
+        _2Dobjects.add(new Rect2D(3,0,2));
+        _2Dobjects.get(1).setSpeed(new MyVector2D(0.001f,0.001f));
+        _2Dobjects.get(1).setMass(10);
 
 //        outText = findViewById(R.id.outText);
 //        Button cosBtn = findViewById(R.id.cosBtn);
@@ -757,6 +774,80 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
 
     void RefreshDrawParametrs(){
+
+
+        for (Object2D obj : _2Dobjects){
+
+
+
+
+
+            if (obj.getClass().equals(Rect2D.class)){
+                Rect2D rect = (Rect2D) obj;
+
+                if (rect.OnCollision()){
+                    for (Object2D objInCol : rect.objInCollision){
+
+                        float movementAngle1 = (float) Math.atan(rect.speed.y/rect.speed.x);
+                        float movementAngle2 = (float) Math.atan(objInCol.speed.y/objInCol.speed.x);
+                        float scalarSpeed1 = (float) Math.sqrt(Math.pow(rect.speed.x,2) + Math.pow(rect.speed.y,2));
+                        float scalarSpeed2 = (float)  Math.sqrt(Math.pow(objInCol.speed.x,2) + Math.pow(objInCol.speed.y,2));
+
+
+                        float collisionAngle;
+
+                        if (movementAngle1 > movementAngle2){collisionAngle = movementAngle1 - movementAngle2;}
+                        else{collisionAngle = movementAngle2 - movementAngle1;}
+
+                        Log.i("ZnachMove","movementAngle1 = " + movementAngle1 + " movementAngle2 = " +
+                                movementAngle2 + " scalarSpeed1 = " + scalarSpeed1 + " scalarSpeed2 = " + scalarSpeed2 + " collisionAngle = " + collisionAngle);
+
+
+
+
+                        rect.speed.x = (float) ((scalarSpeed1 * Math.cos(movementAngle1 - collisionAngle)*(rect.mass - objInCol.mass) +
+                                2 * objInCol.mass * scalarSpeed2 * Math.cos(movementAngle2 - collisionAngle))*Math.cos(collisionAngle)
+                                /(rect.mass + objInCol.mass)
+                                + scalarSpeed1 * Math.sin(movementAngle1 - collisionAngle) * Math.cos(collisionAngle + Math.PI/2));
+
+                        rect.speed.y = (float) ((scalarSpeed1 * Math.cos(movementAngle1 - collisionAngle)*(rect.mass - objInCol.mass) +
+                                2 * objInCol.mass * scalarSpeed2 * Math.cos(movementAngle2 - collisionAngle))*Math.sin(collisionAngle)
+                                /(rect.mass + objInCol.mass)
+                                + scalarSpeed1 * Math.sin(movementAngle1 - collisionAngle) * Math.sin(collisionAngle + Math.PI/2));
+
+                        objInCol.speed.x = (float) ((scalarSpeed2 * Math.cos(movementAngle2 - collisionAngle)*(objInCol.mass - rect.mass) +
+                                2 * rect.mass * scalarSpeed1 * Math.cos(movementAngle1 - collisionAngle))*Math.cos(collisionAngle)
+                                /(rect.mass + objInCol.mass)
+                                + scalarSpeed2 * Math.sin(movementAngle2 - collisionAngle) * Math.cos(collisionAngle + Math.PI/2));
+
+                        objInCol.speed.y = (float) ((scalarSpeed2 * Math.cos(movementAngle2 - collisionAngle)*(objInCol.mass - rect.mass) +
+                                2 * rect.mass * scalarSpeed1 * Math.cos(movementAngle1 - collisionAngle))*Math.sin(collisionAngle)
+                                /(rect.mass + objInCol.mass)
+                                + scalarSpeed2 * Math.sin(movementAngle2 - collisionAngle) * Math.sin(collisionAngle + Math.PI/2));
+
+
+                    }
+                }
+            }
+
+
+            if (obj.OnBorderCollision() == WhatCollisionOn.WIDTH){
+                obj.speed.x *= -1;
+                obj.speed.y *= 1;
+            }
+            if (obj.OnBorderCollision() == WhatCollisionOn.HEIGHT){
+                obj.speed.x *= 1;
+                obj.speed.y *= -1;
+            }
+
+
+            obj.setX(obj.x + obj.speed.x);
+            obj.setY(obj.y + obj.speed.y);
+
+        }
+
+
+
         LinearLayout lin = (LinearLayout)findViewById(R.id.formula_inputs_container_container);
         allCalculetblePoints.clear();
         funcsWeDo.clear();
@@ -778,6 +869,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                 Log.i("ERROROFSEX",e.getMessage());
             }
         }
+
     }
 
 
@@ -837,6 +929,94 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         return false;
     }
 
+    ArrayList<Path> FuncPointsCalculate(double xMult,double yMult,double xCentre, double yCentre,double step){
+        double fromx = xMin;
+        double tox = xMax;
+        try {
+
+            for (String func : funcsWeDo){
+
+                ArrayList<FormulSistem.Pair<Double,Double>> calculetblePoints = allCalculetblePoints.get(func);
+
+                Log.i("Nigger","" + func);
+
+                if (false) {
+//                    if (calculetblePoints != null) {
+//
+//                        if (calculetblePoints.size() != 0 ) {
+//                            fromx = calculetblePoints.get(calculetblePoints.size() - 1).element1;
+//
+//                            while (calculetblePoints.get(0).element1 < xMin) {
+//                                calculetblePoints.remove(0);
+//                            }
+//
+//                            calculetblePoints.addAll(FormulSistem.Calculate(func, fromx, tox, step));
+//
+//                            fromx = xMin;
+//                            tox = calculetblePoints.get(0).element1;
+//
+//                            for (int i = calculetblePoints.size() - 1; calculetblePoints.get(i).element1 > xMax; i--) {
+//                                calculetblePoints.remove(i);
+//                            }
+//
+//                            calculetblePoints.addAll(0, FormulSistem.Calculate(func, fromx, tox, step));
+//                        }else{
+//                            calculetblePoints = FormulSistem.Calculate(func, xMin, xMax, step);
+//                        }
+                }else {
+                    calculetblePoints = FormulSistem.Calculate(func, xMin, xMax, step);
+                }
+                allCalculetblePoints.remove(func);
+                allCalculetblePoints.put(func,calculetblePoints);
+            }
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        Log.i("allCalculetblePoints","" + allCalculetblePoints.size() + "\nКЛЮЧИ = \t" + allCalculetblePoints.keySet().toString());
+//            for (ArrayList<FormulSistem.Pair<Double,Double>> p : allCalculetblePoints.values()){
+//                Log.i("calcPoints","" + p.size());
+//            }
+
+        @SuppressLint("DrawAllocation") ArrayList<Path> paths = new ArrayList<>(funcCount);
+
+        int qweoipcj = 0;
+        for (int pathCount = 0;pathCount < funcsWeDo.size(); pathCount++){
+            @SuppressLint("DrawAllocation") Path path = new Path();
+            ArrayList<FormulSistem.Pair<Double,Double>> calculetblePoints = allCalculetblePoints.get(funcsWeDo.get(pathCount));
+
+            if (calculetblePoints != null){
+                for (int i = 0; i < calculetblePoints.size();i++){
+
+                    if (calculetblePoints.get(i).element2.isNaN()){qweoipcj = i + 1; continue;}
+                    if (calculetblePoints.get(i).element2.isInfinite()){
+                        Log.i("SEX","TRAAAAAAAAAAH");
+                        float asscum;
+                        if (calculetblePoints.get(i).element2 > 0){
+                            asscum = -10000.0f;
+                        }else{
+                            asscum = 10000.0f;
+                        }
+                        path.moveTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,asscum );
+                        qweoipcj = i;
+                        continue;
+                    }
+
+                    if (i <= qweoipcj){path.rMoveTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,(float)-calculetblePoints.get(i).element2*(float)yMult + (float)yCentre);}
+                    path.lineTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,(float)-calculetblePoints.get(i).element2*(float)yMult + (float)yCentre);
+
+                }
+            }
+            paths.add(path);
+        }
+        return paths;
+    }
+
+
+
     class DrawView extends View {
 
 
@@ -848,6 +1028,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             p = new Paint();
             rect = new Rect();
         }
+
 
         @Override
         protected void onDraw(Canvas canvas) {
@@ -915,7 +1096,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 //            Cy = DrobAndCelayaChast(Math.log10(yMax - yMin)).first;
             Log.i("Cy","" + Cy);
 
-            double step;
             //Центры координатных осей относительно сторон экрана
             double xCentre = ( - xMin/(xMax - xMin))*width;
             double yCentre = (yMax/(yMax - yMin))*height;
@@ -952,6 +1132,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             Log.i("assHole","[xMax " + xMax + "|xMin " + xMin + "|yMax " + yMax + "|yMin " + yMin + ']');
 
 
+//          Создание коорд сетки
             double count;
             p.setStyle(Paint.Style.FILL);
             count = DrobAndCelayaChast(xMin/Cx).first*Cx - Cx;
@@ -1034,95 +1215,11 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             //Строиться с точностью до 0.01*ЦенаДеления
             step = 0.005*Cx;
 
-            double fromx = xMin;
-            double tox = xMax;
-            try {
-
-                for (String func : funcsWeDo){
-
-                    ArrayList<FormulSistem.Pair<Double,Double>> calculetblePoints = allCalculetblePoints.get(func);
-
-                    Log.i("Nigger","" + func);
-
-                    if (false) {
-//                    if (calculetblePoints != null) {
-
-                        if (calculetblePoints.size() != 0 ) {
-                            fromx = calculetblePoints.get(calculetblePoints.size() - 1).element1;
-
-                            while (calculetblePoints.get(0).element1 < xMin) {
-                                calculetblePoints.remove(0);
-                            }
-
-                            calculetblePoints.addAll(FormulSistem.Calculate(func, fromx, tox, step));
-
-                            fromx = xMin;
-                            tox = calculetblePoints.get(0).element1;
-
-                            for (int i = calculetblePoints.size() - 1; calculetblePoints.get(i).element1 > xMax; i--) {
-                                calculetblePoints.remove(i);
-                            }
-
-                            calculetblePoints.addAll(0, FormulSistem.Calculate(func, fromx, tox, step));
-                        }else{
-                            calculetblePoints = FormulSistem.Calculate(func, xMin, xMax, step);
-                        }
-                    }else {
-                        calculetblePoints = FormulSistem.Calculate(func, xMin, xMax, step);
-                    }
-                    allCalculetblePoints.remove(func);
-                    allCalculetblePoints.put(func,calculetblePoints);
-                }
-
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
+            ArrayList<Path> paths = FuncPointsCalculate(xMult,yMult,xCentre,yCentre,step);
 
 
-            Log.i("allCalculetblePoints","" + allCalculetblePoints.size() + "\nКЛЮЧИ = \t" + allCalculetblePoints.keySet().toString());
-//            for (ArrayList<FormulSistem.Pair<Double,Double>> p : allCalculetblePoints.values()){
-//                Log.i("calcPoints","" + p.size());
-//            }
-
-            @SuppressLint("DrawAllocation") ArrayList<Path> paths = new ArrayList<>(funcCount);
-
-            int qweoipcj = 0;
-            for (int pathCount = 0;pathCount < funcsWeDo.size(); pathCount++){
-                @SuppressLint("DrawAllocation") Path path = new Path();
-                ArrayList<FormulSistem.Pair<Double,Double>> calculetblePoints = allCalculetblePoints.get(funcsWeDo.get(pathCount));
-
-                if (calculetblePoints != null){
-                    for (int i = 0; i < calculetblePoints.size();i++){
-
-                        if (calculetblePoints.get(i).element2.isNaN()){qweoipcj = i + 1; continue;}
-                        if (calculetblePoints.get(i).element2.isInfinite()){
-                            Log.i("SEX","TRAAAAAAAAAAH");
-                            float asscum;
-                            if (calculetblePoints.get(i).element2 > 0){
-                                asscum = -10000.0f;
-                            }else{
-                                asscum = 10000.0f;
-                            }
-                            path.moveTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,asscum );
-                            qweoipcj = i;
-                            continue;
-                        }
-
-                        if (i <= qweoipcj){path.rMoveTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,(float)-calculetblePoints.get(i).element2*(float)yMult + (float)yCentre);}
-                        path.lineTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,(float)-calculetblePoints.get(i).element2*(float)yMult + (float)yCentre);
-
-                    }
-                }
-                Log.i("ass",path.toString());
-                paths.add(path);
-            }
-
-//            Log.i("assHole",s);
             Log.i("CenaDel","[Cx " + Cx + "|Cy " + Cy + "|Cex " + Cex + "|Cey " + Cey + ']');
-//            Log.i("Mult","[" + xMult + '|' + yMult + ']');
 
-//            canvas.drawLines(new float[]{100,100,100,500},p);
             //Построение графика заданной функции
             p.setStrokeWidth(3);
             p.setStyle(Paint.Style.STROKE);
@@ -1142,11 +1239,212 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 //            canvas.drawCircle(xOfPlayer,yOfPlayer,radius,p);
 
 //            canvas.drawPath(circleOfLife,p);
-            canvas.drawRect(xOfPlayer,yOfPlayer,xOfPlayer + radius*(float)xMult,yOfPlayer + radius*(float)yMult,p);
+//            canvas.drawRect(xOfPlayer,yOfPlayer,xOfPlayer + radius*(float)xMult,yOfPlayer + radius*(float)yMult,p);
+
+//            Rect2D rect = (Rect2D) _2Dobjects.get(0);
+
+            for(Object2D obj :  _2Dobjects){
+
+                Rect2D rect = (Rect2D)obj;
+
+                Log.i("rectPos","x = " + rect.x + " y = " + rect.y);
+
+                canvas.drawRect((float) (rect.x*xMult + xCentre),(float) (-rect.y*yMult + yCentre),(float) ((rect.x + rect.side)*xMult + xCentre),(float) (-(rect.y - rect.side)*yMult + yCentre),p);
+            }
+
+
+
 
             Log.i("playerPos","y = " + yOfPlayer + " x = " + xOfPlayer + "radius = " + radius);
 
         }
 
+    }
+
+    class Object2D{
+        MyVector2D speed;
+        protected float y;
+        protected float x;
+
+        protected float mass;
+
+        Object2D(){
+        }
+
+        public void setX(float x) {
+            this.x = x;
+        }
+
+        public void setY(float y) {
+            this.y = y;
+        }
+
+        public void setMass(float mass) {
+            this.mass = mass;
+        }
+
+        public WhatCollisionOn OnBorderCollision(){
+            if ((x >= xMax) || (x <= xMin)){return WhatCollisionOn.WIDTH;}
+            if ((y >= yMax) || (y <= yMin)){return WhatCollisionOn.HEIGHT;}
+            return null;
+        }
+
+        public boolean OnCollision() {
+            for (String func : funcsWeDo){
+                ArrayList<FormulSistem.Pair<Double,Double>> curGraph = allCalculetblePoints.get(func);
+//                Log.i("KeysAndGays", " key = " + func + " gay = " +  allCalculetblePoints.containsKey(func) + "jopa = " + allCalculetblePoints.keySet());
+                if (curGraph == null){continue;}
+                Log.i("Anal","ajfop");
+                Log.i("Collision","step = " + step + " xGraph = " + curGraph.get(curGraph.size() - 1).element1 + " this.x = " + this.x + " yGraph = " + curGraph.get(curGraph.size() - 1).element2 + " this.y = " + this.y );
+
+                for (FormulSistem.Pair<Double,Double> point : curGraph){
+                    if (point.element1 - (this.x ) < step){
+                        return true;
+                    }
+                    if (point.element2 - this.y < step){
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+
+        public void setSpeed(MyVector2D speed) {
+            this.speed = speed;
+        }
+    }
+
+    class Rect2D extends Object2D{
+        float side;
+        PointF start = new PointF(this.x,this.y);
+        PointF end = new PointF(this.x + side,this.y + side);
+
+        @Override
+        public void setX(float x) {
+            super.setX(x);
+            start.x = x;
+            end.x = x + side;
+        }
+
+        @Override
+        public void setY(float y) {
+            super.setY(y);
+            start.y = y;
+            end.y = y + side;
+        }
+
+        public void setSide(float side){
+            this.side = side;
+        }
+
+        ArrayList<Object2D> objInCollision = new ArrayList<>();
+
+        Rect2D(float x,float y,float side){
+            this.x = x;
+            this.y = y;
+            this.side = side;
+        }
+
+        @Override
+        public WhatCollisionOn OnBorderCollision(){
+            if ((x + side >= xMax) || (x - side <= xMin)){return WhatCollisionOn.WIDTH;}
+            if ((y + side >= yMax) || (y - side <= yMin)){return WhatCollisionOn.HEIGHT;}
+            return null;
+        }
+
+
+
+        @Override
+        public boolean OnCollision() {
+            this.start.x = this.x;
+            this.start.y = this.y;
+            this.end.x = this.x + side;
+            this.end.y = this.y + side;
+
+            boolean onCollision = false;
+            for (Object2D obj : _2Dobjects){
+
+                if (obj.getClass().equals(Rect2D.class)){
+
+                    Rect2D anotherRect = (Rect2D) obj;
+
+//                    Log.i("SwingerParty","x = " + anotherRect.x + " y = " + anotherRect.x + " ");
+
+
+                    if (anotherRect.equals(this)){continue;}
+                    objInCollision.remove(anotherRect);
+
+
+                    if ((((anotherRect.start.x >= this.start.x) && (anotherRect.start.x <= this.end.x))
+                            && ((anotherRect.start.y >= this.start.y) && (anotherRect.start.y <= this.end.y)))
+                            || (((anotherRect.end.x >= this.start.x) && (anotherRect.end.x <= this.end.x))
+                            && ((anotherRect.end.y >= this.start.y) && (anotherRect.end.y <= this.end.y)))) {
+                        objInCollision.add(anotherRect);
+                        onCollision = true;
+                    }
+
+                }
+            }
+            return onCollision;
+        }
+    }
+
+    class Circle2D extends Object2D{
+        float radius;
+
+        Circle2D(float x,float y,float radius){
+            this.x = x;
+            this.y = y;
+            this.radius = radius;
+        }
+
+        @Override
+        public WhatCollisionOn OnBorderCollision(){
+            if ((x + radius >= xMax) || (x - radius <= xMin)){return WhatCollisionOn.WIDTH;}
+            if ((y + radius >= yMax) || (y - radius <= yMin)){return WhatCollisionOn.HEIGHT;}
+            return null;
+        }
+
+
+        @Override
+        public boolean OnCollision() {
+            for (String func : funcsWeDo){
+                ArrayList<FormulSistem.Pair<Double,Double>> curGraph = allCalculetblePoints.get(func);
+//                Log.i("KeysAndGays", " key = " + func + " gay = " +  allCalculetblePoints.containsKey(func) + "jopa = " + allCalculetblePoints.keySet());
+                if (curGraph == null){continue;}
+
+                for (FormulSistem.Pair<Double,Double> point : curGraph){
+//                    if (Math.pow(point.element1 - this.x,2) + Math.pow(point.element2 - this.y,2) == this.radius){
+//                        Log.i("CollisionDJIOQW","step = " + step + " xGraph = " + point.element1 + " this.x = " + this.x + " yGraph = " + point.element2 + " this.y = " + this.y);
+//                        return true;
+//                    }
+
+                    if ((((this.x - radius) < point.element1) && (point.element1 < (this.x + radius))) && (((this.y - radius) < point.element2) && (point.element2 < (this.y + radius)))){
+                        Log.i("CollisionDJIOQW","step = " + step + " xGraph = " + point.element1 + " this.x = " + this.x + " yGraph = " + point.element2 + " this.y = " + this.y);
+
+
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    enum WhatCollisionOn{
+        WIDTH,
+        HEIGHT,
+    }
+
+
+
+    class MyVector2D{
+        float x;
+        float y;
+        MyVector2D(float x,float y){
+            this.x = x;
+            this.y = y;
+        }
     }
 }
