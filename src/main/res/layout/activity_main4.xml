@@ -266,7 +266,7 @@
 
         app:layout_constraintVertical_bias="1.0"
 
-        android:visibility="gone"
+        android:visibility="visible"
         >
 
         <ImageButton
@@ -324,7 +324,9 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="1.0"
             android:background="@drawable/formul_keybord_btn_back"
-            android:max="20"/>
+            android:max="20"
+            android:visibility="gone"
+            />
 
 
 
@@ -336,7 +338,8 @@
             android:layout_height="100dp"
             app:layout_constraintBottom_toTopOf="@+id/leftBtn"
             app:layout_constraintEnd_toStartOf="@+id/upBtn"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            android:visibility="gone"/>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -460,7 +463,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintVertical_bias="1.0"/>
+        app:layout_constraintVertical_bias="1.0"
+        android:visibility="gone"
+        />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

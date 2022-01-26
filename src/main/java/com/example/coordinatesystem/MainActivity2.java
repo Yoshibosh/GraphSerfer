@@ -599,15 +599,27 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         ImageButton rightBtn = findViewById(R.id.rightBtn);
         ImageButton leftBtn = findViewById(R.id.leftBtn);
 
+
+
         upBtn.setOnTouchListener((v, event) -> {
 
             int action = event.getAction();
 
             if (action == MotionEvent.ACTION_DOWN){
-                koefY = -1;
+
+                for (Body circle : circles){
+                    Vector2 velocity = circle.getLinearVelocity();
+                    circle.setLinearVelocity(velocity.x,velocity.y + 1);
+                }
+
             }else if
             (action == MotionEvent.ACTION_UP){
-                koefY = 0;
+
+//                for (Body circle : circles){
+//                    Vector2 velocity = circle.getLinearVelocity();
+//                    circle.setLinearVelocity(velocity.x,velocity.y - 1);
+//                }
+
             }
             return false;
         });
@@ -616,10 +628,20 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             int action = event.getAction();
 
             if (action == MotionEvent.ACTION_DOWN){
-                koefY = 1;
+
+                for (Body circle : circles){
+                    Vector2 velocity = circle.getLinearVelocity();
+                    circle.setLinearVelocity(velocity.x,velocity.y - 1);
+                }
+
             }else if
             (action == MotionEvent.ACTION_UP){
-                koefY = 0;
+
+//                for (Body circle : circles){
+//                    Vector2 velocity = circle.getLinearVelocity();
+//                    circle.setLinearVelocity(velocity.x,velocity.y + 1);
+//                }
+
             }
             return false;
         });
@@ -628,10 +650,20 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             int action = event.getAction();
 
             if (action == MotionEvent.ACTION_DOWN){
-                koefX = 1;
+
+                for (Body circle : circles){
+                    Vector2 velocity = circle.getLinearVelocity();
+                    circle.setLinearVelocity(velocity.x + 1,velocity.y);
+                }
+
             }else if
             (action == MotionEvent.ACTION_UP){
-                koefX = 0;
+
+//                for (Body circle : circles){
+//                    Vector2 velocity = circle.getLinearVelocity();
+//                    circle.setLinearVelocity(velocity.x - 1,velocity.y);
+//                }
+
             }
             return false;
         });
@@ -640,10 +672,20 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             int action = event.getAction();
 
             if (action == MotionEvent.ACTION_DOWN){
-                koefX = -1;
+
+                for (Body circle : circles){
+                    Vector2 velocity = circle.getLinearVelocity();
+                    circle.setLinearVelocity(velocity.x - 1,velocity.y);
+                }
+
             }else if
             (action == MotionEvent.ACTION_UP){
-                koefX = 0;
+
+//                for (Body circle : circles){
+//                    Vector2 velocity = circle.getLinearVelocity();
+//                    circle.setLinearVelocity(velocity.x + 1,velocity.y);
+//                }
+
             }
             return false;
         });
@@ -753,6 +795,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         // world.setGravity(0,-10);
         // world.setGravity(Vector2.create(10,-Math.PI/2));
         world.getSettings().setStepFrequency(0.001);//Set the step frequency, the interval between two calculations is 1 millisecond
+        world.setGravity(0,0);
         /*------Create a world------*/
 
         /*------Create entity------*/
@@ -763,6 +806,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             ball.getTransform().setTranslation(i,i);//Set the Y coordinate of the ball to 10m
             ball.setMass(MassType.NORMAL);//Automatically calculate the mass of the ball
             ball.setLinearVelocity(new Vector2(1,1));
+            ball.getFixture(0).setFriction(2);
+            ball.getFixture(0).setDensity(2);
 
             world.addBody(ball);
             circles.add(ball);
@@ -773,8 +818,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
         //bottom
         ground =new Body();//The same method to create the ground
-        ground.addFixture(new Rectangle((xMax - xMin)*2,0.1));//The ground is a rectangle, 100m wide and 0.1m high
-        ground.getTransform().setTranslation(xMin,yMin);//Move the ground down 0.05m to ensure that the Y coordinate of the upper edge of the ground is 0
+        ground.addFixture(new Rectangle((xMax - xMin),0.1));//The ground is a rectangle, 100m wide and 0.1m high
+        ground.getTransform().setTranslation(xMin + (xMax - xMin)/2,yMin);//Move the ground down 0.05m to ensure that the Y coordinate of the upper edge of the ground is 0
         ground.setMass(MassType.INFINITE);//S
 
         world.addBody(ground);
@@ -784,7 +829,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         //top
         ground =new Body();//The same method to create the ground
         ground.addFixture(new Rectangle((xMax - xMin),0.1));//The ground is a rectangle, 100m wide and 0.1m high
-        ground.getTransform().setTranslation(xMin,yMax);//Move the ground down 0.05m to ensure that the Y coordinate of the upper edge of the ground is 0
+        ground.getTransform().setTranslation(xMin + (xMax - xMin)/2,yMax);//Move the ground down 0.05m to ensure that the Y coordinate of the upper edge of the ground is 0
         ground.setMass(MassType.INFINITE);//S
 
         world.addBody(ground);
@@ -794,7 +839,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         //start
         ground = new Body();//The same method to create the ground
         ground.addFixture(new Rectangle(0.1,(yMax - yMin)));//The ground is a rectangle, 100m wide and 0.1m high
-        ground.getTransform().setTranslation(xMin,yMin);//Move the ground down 0.05m to ensure that the Y coordinate of the upper edge of the ground is 0
+        ground.getTransform().setTranslation(xMin,yMin + (yMax - yMin)/2);//Move the ground down 0.05m to ensure that the Y coordinate of the upper edge of the ground is 0
         ground.setMass(MassType.INFINITE);//S
 
         world.addBody(ground);
@@ -805,7 +850,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         //end
         ground = new Body();//The same method to create the ground
         ground.addFixture(new Rectangle(0.1,(yMax - yMin)));//The ground is a rectangle, 100m wide and 0.1m high
-        ground.getTransform().setTranslation(xMax,yMin);//Move the ground down 0.05m to ensure that the Y coordinate of the upper edge of the ground is 0
+        ground.getTransform().setTranslation(xMax,yMin + (yMax - yMin)/2);//Move the ground down 0.05m to ensure that the Y coordinate of the upper edge of the ground is 0
         ground.setMass(MassType.INFINITE);//S
 
         world.addBody(ground);
@@ -1406,11 +1451,11 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
                 body.Refresh();
 
-                Log.i("PosRect", "x = " + body.posStart.x + " y = " + body.posStart.y);
+                Log.i("PosRect", "xStart = " + body.posStart.x + " yStart = " + body.posStart.y + "xEnd = " + body.posEnd.x + " yEnd = " + body.posEnd.y);
 
 
-                PointF rect = ToDisplayCoords(body.body.getTransform().getTranslationX(),body.body.getTransform().getTranslationY());
-                PointF endRect = ToDisplayCoords(body.body.getTransform().getTranslationX() + body.width,body.body.getTransform().getTranslationY() + body.height);
+                PointF rect = ToDisplayCoords(body.posStart.x,body.posStart.y);
+                PointF endRect = ToDisplayCoords(body.posEnd.x,body.posEnd.y);
 
 
                 canvas.drawLine(rect.x,rect.y,endRect.x,endRect.y,p);
@@ -1447,8 +1492,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         }
 
         void Refresh(){
-            this.posStart = new PointF((float) body.getTransform().getTranslationX(),(float) body.getTransform().getTranslationY());
-            this.posEnd = new PointF(this.posStart.x + width, this.posStart.y + height);
+            this.posStart = new PointF((float) this.body.getTransform().getTranslation().x - this.width/2,(float) this.body.getTransform().getTranslation().y - this.height/2);
+            this.posEnd = new PointF(this.posStart.x + this.width, this.posStart.y + this.height);
         }
 
     }
@@ -1471,39 +1516,48 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
         @Override
         void Refresh() {
+
+//            this.body.removeAllFixtures();
+//
+//            if (side == sideOfDisplay.START){
+//
+//                this.height = (float) ((yMax - yMin) - (xMax - xMin)/4);
+//
+//                this.body.addFixture(new Rectangle(0.1,this.height));
+//
+////                this.body.translate(new Vector2( xMin - this.posStart.x,yMin - this.posStart.y ));
+//                this.body.getTransform().setTranslation(xMin + (xMax - xMin)/4,yMin + (yMax - yMin)/4);
+//
+//            }else if (side == sideOfDisplay.END){
+//
+//                this.height = (float) ((yMax - yMin) - (xMax - xMin)/4);
+//
+//                this.body.addFixture(new Rectangle(0.1,this.height));
+//
+////                this.body.translate(new Vector2( xMax - this.posEnd.x,yMin - this.posStart.y ));
+//                this.body.getTransform().setTranslation(xMax - (xMax - xMin)/4,yMin + (yMax - yMin)/4);
+//
+//            }else if (side == sideOfDisplay.TOP){
+//
+//                this.width = (float) ((xMax - xMin) - (xMax - xMin)/4);
+//
+//                this.body.addFixture(new Rectangle(this.width,0.1));
+//
+////                this.body.translate(new Vector2( xMin - this.posStart.x,yMax - this.posEnd.y ));
+//                this.body.getTransform().setTranslation(xMin + (xMax - xMin)/4,yMax - (yMax - yMin)/4);
+//
+//            }else if (side == sideOfDisplay.BOTTOM){
+//
+//                this.width = (float) ((xMax - xMin) - (xMax - xMin)/4);
+//
+//                this.body.addFixture(new Rectangle(this.width,0.1));
+//
+////                this.body.translate(new Vector2( xMin - this.posStart.x,yMin - this.posStart.y ));
+//                this.body.getTransform().setTranslation(xMin + (xMax - xMin)/4,yMin + (yMax - yMin)/4);
+//
+//            }
+
             super.Refresh();
-
-            this.body.removeAllFixtures();
-
-            if (side == sideOfDisplay.START){
-
-                this.body.addFixture(new Rectangle(0.1,(yMax - yMin)/2));
-
-//                this.body.translate(new Vector2( xMin - this.posStart.x,yMin - this.posStart.y ));
-                this.body.getTransform().setTranslation(xMin + (xMax - xMin)/2,yMin + (yMax - yMin)/2);
-
-            }else if (side == sideOfDisplay.END){
-
-                this.body.addFixture(new Rectangle(0.1,(yMax - yMin)/2));
-
-//                this.body.translate(new Vector2( xMax - this.posEnd.x,yMin - this.posStart.y ));
-                this.body.getTransform().setTranslation(xMax - (xMax - xMin)/2,yMin + (yMax - yMin)/2);
-
-            }else if (side == sideOfDisplay.TOP){
-
-                this.body.addFixture(new Rectangle((xMax - xMin)/2,0.1));
-
-//                this.body.translate(new Vector2( xMin - this.posStart.x,yMax - this.posEnd.y ));
-                this.body.getTransform().setTranslation(xMin + (xMax - xMin)/2,yMax - (yMax - yMin)/2);
-
-            }else if (side == sideOfDisplay.BOTTOM){
-
-                this.body.addFixture(new Rectangle((xMax - xMin)/2,0.1));
-
-//                this.body.translate(new Vector2( xMin - this.posStart.x,yMin - this.posStart.y ));
-                this.body.getTransform().setTranslation(xMin + (xMax - xMin)/2,yMin + (yMax - yMin)/2);
-
-            }
         }
     }
 
