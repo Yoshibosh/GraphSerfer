@@ -314,7 +314,7 @@
             app:layout_constraintVertical_bias="0.496" />
 
         <SeekBar
-            android:id="@+id/speedSeekBar"
+            android:id="@+id/RestitutionSeekBar"
             android:layout_width="213dp"
             android:layout_height="98dp"
             app:layout_constraintBottom_toTopOf="@+id/rightBtn"
@@ -324,8 +324,8 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="1.0"
             android:background="@drawable/formul_keybord_btn_back"
-            android:max="20"
-            android:visibility="gone"
+            android:max="10"
+            android:visibility="visible"
             />
 
 
@@ -339,7 +339,7 @@
             app:layout_constraintBottom_toTopOf="@+id/leftBtn"
             app:layout_constraintEnd_toStartOf="@+id/upBtn"
             app:layout_constraintStart_toStartOf="parent"
-            android:visibility="gone"/>
+            android:visibility="visible"/>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -453,18 +453,18 @@
     </LinearLayout>
 
     <SeekBar
-        android:id="@+id/radiusSeekBar"
+        android:id="@+id/FrictionSeekBar"
         android:layout_width="213dp"
         android:layout_height="98dp"
         android:background="@drawable/formul_keybord_btn_back"
-        android:max="20"
+        android:max="1000"
         app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintVertical_bias="1.0"
-        android:visibility="gone"
+        android:visibility="visible"
         />
 
 

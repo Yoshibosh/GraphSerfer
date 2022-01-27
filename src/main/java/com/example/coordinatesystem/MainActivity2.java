@@ -67,10 +67,18 @@ import android.widget.TextView;
 
 import com.google.android.material.tabs.TabLayout;
 
+import org.dyn4j.collision.Fixture;
 import org.dyn4j.dynamics.Body;
+import org.dyn4j.geometry.Circle;
+import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Ellipse;
+import org.dyn4j.geometry.Interval;
+import org.dyn4j.geometry.Link;
 import org.dyn4j.geometry.MassType;
+import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Rectangle;
+import org.dyn4j.geometry.Segment;
+import org.dyn4j.geometry.Shape;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.World;
@@ -92,6 +100,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
     ArrayList<Body> circles = new ArrayList<>();
     ArrayList<Sides> sidesOfDisplay = new ArrayList<>();
+    Body graphs;
+    int approximationAccuracy = 20;
 
 
     ConstraintLayout constraintLayout;
@@ -161,6 +171,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
     int currentIndexOfChangeColorBtn = 0;
 
     LayerDrawable curLayerToChange;
+
+    boolean lastDraw = true;
 
 
     static class TouchForMove{
@@ -552,6 +564,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                         scaleTouches.get(1).lastXMovePos =  event.getX(1);
                         scaleTouches.get(1).lastYMovePos =  event.getY(1);
 
+
+
                         isFirst2Touch = true;
                         constraintLayout.removeView(drawView);
                         constraintLayout.addView(drawView,0,constraintLayout.getLayoutParams());
@@ -571,7 +585,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                         rightMove = (touch.lastXMovePos - event.getX()) > 0;
                         upMove = !(yDiff > 0);
 
-                        Log.i("xDiff","" + xDiff);
+//                        Log.i("xDiff","" + xDiff);
 
                         constraintLayout.removeView(drawView);
                         constraintLayout.addView(drawView,0,constraintLayout.getLayoutParams());
@@ -601,6 +615,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
 
 
+        float velocityAdd = 5f;
+
         upBtn.setOnTouchListener((v, event) -> {
 
             int action = event.getAction();
@@ -609,7 +625,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
                 for (Body circle : circles){
                     Vector2 velocity = circle.getLinearVelocity();
-                    circle.setLinearVelocity(velocity.x,velocity.y + 1);
+                    circle.setLinearVelocity(velocity.x,velocity.y + velocityAdd);
                 }
 
             }else if
@@ -631,7 +647,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
                 for (Body circle : circles){
                     Vector2 velocity = circle.getLinearVelocity();
-                    circle.setLinearVelocity(velocity.x,velocity.y - 1);
+                    circle.setLinearVelocity(velocity.x,velocity.y - velocityAdd);
                 }
 
             }else if
@@ -653,7 +669,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
                 for (Body circle : circles){
                     Vector2 velocity = circle.getLinearVelocity();
-                    circle.setLinearVelocity(velocity.x + 1,velocity.y);
+                    circle.setLinearVelocity(velocity.x + velocityAdd,velocity.y);
                 }
 
             }else if
@@ -675,7 +691,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
                 for (Body circle : circles){
                     Vector2 velocity = circle.getLinearVelocity();
-                    circle.setLinearVelocity(velocity.x - 1,velocity.y);
+                    circle.setLinearVelocity(velocity.x - velocityAdd,velocity.y);
                 }
 
             }else if
@@ -726,13 +742,18 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
         t.start();
 
-        SeekBar speedSeekBar = findViewById(R.id.speedSeekBar);
-        SeekBar radiusSeekBar = findViewById(R.id.radiusSeekBar);
-        speedSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        SeekBar RestitutionSeekBar = findViewById(R.id.RestitutionSeekBar);
+        SeekBar FrictionSeekBar = findViewById(R.id.FrictionSeekBar);
+        FrictionSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                speed = (float)Math.pow(10,-speedSeekBar.getProgress());
-                RefreshDrawParametrs();
+
+                for (Body ball : circles){
+//                    ball.getFixture(0).setFriction(FrictionSeekBar.getProgress());
+                    ball.getFixture(0).setFriction(FrictionSeekBar.getProgress());
+                }
+
+
             }
 
             @Override
@@ -746,11 +767,13 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             }
         });
 
-        radiusSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        RestitutionSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                radiusOfP = (float)radiusSeekBar.getProgress()/10;
-                RefreshDrawParametrs();
+
+                for (Body ball : circles){
+                    ball.getFixture(0).setRestitution(RestitutionSeekBar.getProgress()/10.0);
+                }
             }
 
             @Override
@@ -766,39 +789,53 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
         ImageButton cameraFollowsPlayer = findViewById(R.id.cameraFollowsPlayer);
         cameraFollowsPlayer.setOnClickListener(v -> {
-            cameraFollowPlayer = !cameraFollowPlayer;
+
+            circles.get(0).getFixture(0).setDensity(ball.getFixture(0).getDensity() + 10);
         });
 
 
 
 
-
-        _2Dobjects.add(new Rect2D(-2,0,1));
-        _2Dobjects.get(0).setSpeed(new MyVector2D(0.001f,0.002f));
-        _2Dobjects.get(0).setMass(10);
-        _2Dobjects.get(0).elastic = 0.5f;
-
-        _2Dobjects.add(new Rect2D(3,0,1));
-        _2Dobjects.get(1).setSpeed(new MyVector2D(0.001f,0.001f));
-        _2Dobjects.get(1).setMass(10);
-        _2Dobjects.get(1).elastic = 0.5f;
-
-        _2Dobjects.add(new Rect2D(5,2,1));
-        _2Dobjects.get(2).setSpeed(new MyVector2D(0.002f,0.001f));
-        _2Dobjects.get(2).setMass(10);
-        _2Dobjects.get(2).elastic = 0.5f;
+//        _2Dobjects.add(new Rect2D(-2,0,1));
+//        _2Dobjects.get(0).setSpeed(new MyVector2D(0.001f,0.002f));
+//        _2Dobjects.get(0).setMass(10);
+//        _2Dobjects.get(0).elastic = 0.5f;
+//
+//        _2Dobjects.add(new Rect2D(3,0,1));
+//        _2Dobjects.get(1).setSpeed(new MyVector2D(0.001f,0.001f));
+//        _2Dobjects.get(1).setMass(10);
+//        _2Dobjects.get(1).elastic = 0.5f;
+//
+//        _2Dobjects.add(new Rect2D(5,2,1));
+//        _2Dobjects.get(2).setSpeed(new MyVector2D(0.002f,0.001f));
+//        _2Dobjects.get(2).setMass(10);
+//        _2Dobjects.get(2).elastic = 0.5f;
 
         /*------Create a world------*/
         world=new World<Body>();//Create the world
 //        world.setGravity(new Vector2(0,-10));//The acceleration of gravity is set to 10m·s^(-2)
         //The following are two other ways of writing
-        // world.setGravity(0,-10);
+         world.setGravity(0,-1);
         // world.setGravity(Vector2.create(10,-Math.PI/2));
-        world.getSettings().setStepFrequency(0.001);//Set the step frequency, the interval between two calculations is 1 millisecond
-        world.setGravity(0,0);
+        world.getSettings().setStepFrequency(0.01);//Set the step frequency, the interval between two calculations is 1 millisecond
+//        world.setGravity(0,-1);
         /*------Create a world------*/
 
         /*------Create entity------*/
+
+
+
+//        Body line = new Body();
+//        line.setMass(MassType.INFINITE);
+//        line.addFixture(new Link(new Vector2(0,0),new Vector2(5,0)));
+//        world.addBody(line);
+
+        graphs = new Body();
+        graphs.setMass(MassType.INFINITE);
+        world.addBody(graphs);
+
+
+
         for (int i = 0;i < 10;i++){
 
             ball=new Body();//Create a container to store the balls
@@ -806,7 +843,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             ball.getTransform().setTranslation(i,i);//Set the Y coordinate of the ball to 10m
             ball.setMass(MassType.NORMAL);//Automatically calculate the mass of the ball
             ball.setLinearVelocity(new Vector2(1,1));
-            ball.getFixture(0).setFriction(2);
+            ball.getFixture(0).setFriction(10);
             ball.getFixture(0).setDensity(2);
 
             world.addBody(ball);
@@ -932,98 +969,103 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
     void RefreshDrawParametrs(){
 
 
-        for (Object2D obj : _2Dobjects){
 
+        world.step(1);
 
-
-            world.step(1);
-
-            if (obj.getClass().equals(Rect2D.class)){
-                Rect2D rect = (Rect2D) obj;
-
-                if (rect.OnCollision()){
-
-                    if (!(rect.color == Color.BLUE)){rect.color = Color.GREEN;}
-
-                    for (Object2D objInCol : rect.objInCollision.first){
-
-                        if (rect.equals(objInCol)){continue;}
-                        objInCol.color = Color.BLUE;
-
-                        float movementAngle1 = (float) Math.atan(rect.speed.y/rect.speed.x);
-                        float movementAngle2 = (float) Math.atan(objInCol.speed.y/objInCol.speed.x);
-
-                        float scalarSpeed1 = (float) Math.sqrt(Math.pow(rect.speed.x,2) + Math.pow(rect.speed.y,2));
-                        float scalarSpeed2 = (float)  Math.sqrt(Math.pow(objInCol.speed.x,2) + Math.pow(objInCol.speed.y,2));
-
-
-                        float collisionAngle = (float) Math.PI;
-
-                        Log.i("ZnachMove","movementAngle1 = " + movementAngle1 + " movementAngle2 = " +
-                                movementAngle2 + " scalarSpeed1 = " + scalarSpeed1 + " scalarSpeed2 = " + scalarSpeed2 + " collisionAngle = " + collisionAngle);
-
-
-
-
-
-//                        if (rect.speed.x < 0){scalarSpeed1 *= -1;}
-//                        if (objInCol.speed.x < 0){scalarSpeed2 *= -1;}
-//                        float k =
+        Log.i("FixtureCount","" + graphs.getFixtureCount());
+//        if (lastDraw){graphs.removeAllFixtures();}
+//        Log.i("AfterFixtureCount","" + graphs.getFixtureCount());
+//        for (Object2D obj : _2Dobjects){
 //
-//                        rect.speed.x = (rect.mass - rect.elastic * objInCol.mass) * scalarSpeed1 + objInCol.mass*(1 + rect.elastic)*scalarSpeed2;
-//                        rect.speed.x /= rect.mass + objInCol.mass;
 //
-//                        if (rect.speed.y > 0){scalarSpeed1 *= -1;}
-//                        if (objInCol.speed.y > 0){scalarSpeed2 *= -1;}
 //
-//                        rect.speed.y = (rect.mass - rect.elastic * objInCol.mass) * scalarSpeed1 + objInCol.mass*(1 + rect.elastic)*scalarSpeed2;
-//                        rect.speed.y /= rect.mass + objInCol.mass;
-
-
-
-//                        rect.speed.x = (float) ((scalarSpeed1 * Math.cos(movementAngle1 - collisionAngle)*(rect.mass - objInCol.mass) +
-//                                2 * objInCol.mass * scalarSpeed2 * Math.cos(movementAngle2 - collisionAngle))*Math.cos(collisionAngle)
-//                                /(rect.mass + objInCol.mass)
-//                                + scalarSpeed1 * Math.sin(movementAngle1 - collisionAngle) * Math.cos(collisionAngle + Math.PI/2));
 //
-//                        rect.speed.y = (float) ((scalarSpeed1 * Math.cos(movementAngle1 - collisionAngle)*(rect.mass - objInCol.mass) +
-//                                2 * objInCol.mass * scalarSpeed2 * Math.cos(movementAngle2 - collisionAngle))*Math.sin(collisionAngle)
-//                                /(rect.mass + objInCol.mass)
-//                                + scalarSpeed1 * Math.sin(movementAngle1 - collisionAngle) * Math.sin(collisionAngle + Math.PI/2));
-
-//                        objInCol.speed.x = (float) ((scalarSpeed2 * Math.cos(movementAngle2 - collisionAngle)*(objInCol.mass - rect.mass) +
-//                                2 * rect.mass * scalarSpeed1 * Math.cos(movementAngle1 - collisionAngle))*Math.cos(collisionAngle)
-//                                /(rect.mass + objInCol.mass)
-//                                + scalarSpeed2 * Math.sin(movementAngle2 - collisionAngle) * Math.cos(collisionAngle + Math.PI/2));
+//            if (obj.getClass().equals(Rect2D.class)){
+//                Rect2D rect = (Rect2D) obj;
 //
-//                        objInCol.speed.y = (float) ((scalarSpeed2 * Math.cos(movementAngle2 - collisionAngle)*(objInCol.mass - rect.mass) +
-//                                2 * rect.mass * scalarSpeed1 * Math.cos(movementAngle1 - collisionAngle))*Math.sin(collisionAngle)
-//                                /(rect.mass + objInCol.mass)
-//                                + scalarSpeed2 * Math.sin(movementAngle2 - collisionAngle) * Math.sin(collisionAngle + Math.PI/2));
-
-
-
-                    }
-                }else{
-                    rect.color = Color.RED;
-                }
-            }
-
-
-            if (obj.OnBorderCollision() == WhatCollisionOn.WIDTH){
-                obj.speed.x *= -1;
-                obj.speed.y *= 1;
-            }
-            if (obj.OnBorderCollision() == WhatCollisionOn.HEIGHT){
-                obj.speed.x *= 1;
-                obj.speed.y *= -1;
-            }
-
-
-            obj.setX(obj.x + obj.speed.x);
-            obj.setY(obj.y + obj.speed.y);
-
-        }
+//                if (rect.OnCollision()){
+//
+//                    if (!(rect.color == Color.BLUE)){rect.color = Color.GREEN;}
+//
+//                    for (Object2D objInCol : rect.objInCollision.first){
+//
+//                        if (rect.equals(objInCol)){continue;}
+//                        objInCol.color = Color.BLUE;
+//
+//                        float movementAngle1 = (float) Math.atan(rect.speed.y/rect.speed.x);
+//                        float movementAngle2 = (float) Math.atan(objInCol.speed.y/objInCol.speed.x);
+//
+//                        float scalarSpeed1 = (float) Math.sqrt(Math.pow(rect.speed.x,2) + Math.pow(rect.speed.y,2));
+//                        float scalarSpeed2 = (float)  Math.sqrt(Math.pow(objInCol.speed.x,2) + Math.pow(objInCol.speed.y,2));
+//
+//
+//                        float collisionAngle = (float) Math.PI;
+//
+////                        Log.i("ZnachMove","movementAngle1 = " + movementAngle1 + " movementAngle2 = " +
+////                                movementAngle2 + " scalarSpeed1 = " + scalarSpeed1 + " scalarSpeed2 = " + scalarSpeed2 + " collisionAngle = " + collisionAngle);
+//
+//
+//
+//
+//
+////                        if (rect.speed.x < 0){scalarSpeed1 *= -1;}
+////                        if (objInCol.speed.x < 0){scalarSpeed2 *= -1;}
+////                        float k =
+////
+////                        rect.speed.x = (rect.mass - rect.elastic * objInCol.mass) * scalarSpeed1 + objInCol.mass*(1 + rect.elastic)*scalarSpeed2;
+////                        rect.speed.x /= rect.mass + objInCol.mass;
+////
+////                        if (rect.speed.y > 0){scalarSpeed1 *= -1;}
+////                        if (objInCol.speed.y > 0){scalarSpeed2 *= -1;}
+////
+////                        rect.speed.y = (rect.mass - rect.elastic * objInCol.mass) * scalarSpeed1 + objInCol.mass*(1 + rect.elastic)*scalarSpeed2;
+////                        rect.speed.y /= rect.mass + objInCol.mass;
+//
+//
+//
+////                        rect.speed.x = (float) ((scalarSpeed1 * Math.cos(movementAngle1 - collisionAngle)*(rect.mass - objInCol.mass) +
+////                                2 * objInCol.mass * scalarSpeed2 * Math.cos(movementAngle2 - collisionAngle))*Math.cos(collisionAngle)
+////                                /(rect.mass + objInCol.mass)
+////                                + scalarSpeed1 * Math.sin(movementAngle1 - collisionAngle) * Math.cos(collisionAngle + Math.PI/2));
+////
+////                        rect.speed.y = (float) ((scalarSpeed1 * Math.cos(movementAngle1 - collisionAngle)*(rect.mass - objInCol.mass) +
+////                                2 * objInCol.mass * scalarSpeed2 * Math.cos(movementAngle2 - collisionAngle))*Math.sin(collisionAngle)
+////                                /(rect.mass + objInCol.mass)
+////                                + scalarSpeed1 * Math.sin(movementAngle1 - collisionAngle) * Math.sin(collisionAngle + Math.PI/2));
+//
+////                        objInCol.speed.x = (float) ((scalarSpeed2 * Math.cos(movementAngle2 - collisionAngle)*(objInCol.mass - rect.mass) +
+////                                2 * rect.mass * scalarSpeed1 * Math.cos(movementAngle1 - collisionAngle))*Math.cos(collisionAngle)
+////                                /(rect.mass + objInCol.mass)
+////                                + scalarSpeed2 * Math.sin(movementAngle2 - collisionAngle) * Math.cos(collisionAngle + Math.PI/2));
+////
+////                        objInCol.speed.y = (float) ((scalarSpeed2 * Math.cos(movementAngle2 - collisionAngle)*(objInCol.mass - rect.mass) +
+////                                2 * rect.mass * scalarSpeed1 * Math.cos(movementAngle1 - collisionAngle))*Math.sin(collisionAngle)
+////                                /(rect.mass + objInCol.mass)
+////                                + scalarSpeed2 * Math.sin(movementAngle2 - collisionAngle) * Math.sin(collisionAngle + Math.PI/2));
+//
+//
+//
+//                    }
+//                }else{
+//                    rect.color = Color.RED;
+//                }
+//            }
+//
+//
+//            if (obj.OnBorderCollision() == WhatCollisionOn.WIDTH){
+//                obj.speed.x *= -1;
+//                obj.speed.y *= 1;
+//            }
+//            if (obj.OnBorderCollision() == WhatCollisionOn.HEIGHT){
+//                obj.speed.x *= 1;
+//                obj.speed.y *= -1;
+//            }
+//
+//
+//            obj.setX(obj.x + obj.speed.x);
+//            obj.setY(obj.y + obj.speed.y);
+//
+//        }
 
 
 
@@ -1034,6 +1076,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             LinearLayout linH = (LinearLayout)lin.getChildAt(i);
             EditText FormulaInput = (EditText)linH.getChildAt(0);
             try {
+
                 Log.i("GetText", ""  + FormulaInput.getText().toString() + " size = " + FormulaInput.getText().toString().length());
                 FormulSistem.Calculate(FormulaInput.getText().toString(),0,1,0.2);
                 funcsWeDo.add(FormulaInput.getText().toString());
@@ -1041,13 +1084,18 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                 allCalculetblePoints.put(FormulaInput.getText().toString(),null);
 
 
+
                 constraintLayout.removeView(drawView);
                 constraintLayout.addView(drawView,0,constraintLayout.getLayoutParams());
 
+
             }catch (Exception e){
+
                 Log.i("ERROROFSEX",e.getMessage());
             }
         }
+
+
 
     }
 
@@ -1162,33 +1210,74 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
         @SuppressLint("DrawAllocation") ArrayList<Path> paths = new ArrayList<>(funcCount);
 
+
         int qweoipcj = 0;
+        graphs.removeAllFixtures();
         for (int pathCount = 0;pathCount < funcsWeDo.size(); pathCount++){
             @SuppressLint("DrawAllocation") Path path = new Path();
             ArrayList<FormulSistem.Pair<Double,Double>> calculetblePoints = allCalculetblePoints.get(funcsWeDo.get(pathCount));
 
             if (calculetblePoints != null){
+
+                PointF prevPoint = null;
+                PointF curPoint = null;
+                int counter = 0;
+                ArrayList<Vector2> polygon = new ArrayList<>();
+
                 for (int i = 0; i < calculetblePoints.size();i++){
+
+
 
                     if (calculetblePoints.get(i).element2.isNaN()){qweoipcj = i + 1; continue;}
                     if (calculetblePoints.get(i).element2.isInfinite()){
-                        Log.i("SEX","TRAAAAAAAAAAH");
+//                        Log.i("SEX","TRAAAAAAAAAAH");
                         float asscum;
                         if (calculetblePoints.get(i).element2 > 0){
                             asscum = -10000.0f;
                         }else{
                             asscum = 10000.0f;
                         }
-                        path.moveTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,asscum );
+                        PointF point = ToDisplayCoords(calculetblePoints.get(i).element1,asscum);
+                        path.moveTo(point.x,point.y);
+
+                        prevPoint = new PointF( (float) (double) calculetblePoints.get(i).element1,asscum);
+
                         qweoipcj = i;
                         continue;
                     }
 
-                    if (i <= qweoipcj){path.rMoveTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,(float)-calculetblePoints.get(i).element2*(float)yMult + (float)yCentre);}
-                    path.lineTo((float)(double)calculetblePoints.get(i).element1*(float)xMult + (float)xCentre,(float)-calculetblePoints.get(i).element2*(float)yMult + (float)yCentre);
+                    curPoint = new PointF((float)(double)calculetblePoints.get(i).element1,(float)(double)calculetblePoints.get(i).element2);
+                    PointF point = ToDisplayCoords(curPoint.x,curPoint.y);
+
+                    if (i <= qweoipcj){path.rMoveTo(point.x,point.y);}
+                    path.lineTo(point.x,point.y);
+
+                    counter++;
+
+
+//                    polygon.add(new Vector2(point.x,point.y));
+//                    Доделать надо, чтобы могли быть пробелы
+                    if (prevPoint != null && counter >= approximationAccuracy){
+                        counter = 0;
+//                        Convex shape = new Segment();
+//                        graphs.addFixture();
+                        graphs.addFixture( new Link(new Vector2(prevPoint.x,prevPoint.y),new Vector2(curPoint.x,curPoint.y)));
+                        Log.i("linkP","prevX = " + prevPoint.x + " prevY = " + prevPoint.y + " x = " + curPoint.x + " y = " + curPoint.y );
+
+                        prevPoint = curPoint;
+                    }
+                    if (i < 1){prevPoint = curPoint;}
 
                 }
+
+//                for (int i = calculetblePoints.size() - 1;i > 0;i--){
+//                    polygon.add(new Vector2(calculetblePoints.get(i).element1 + 0.1,calculetblePoints.get(i).element2 + 0.1));
+//                }
+//                polygon.add(new Vector2(calculetblePoints.get(0).element1,calculetblePoints.get(0).element2));
+
+
             }
+
             paths.add(path);
         }
         return paths;
@@ -1217,6 +1306,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         }
 
 
+        @SuppressLint("DrawAllocation")
+        @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         protected void onDraw(Canvas canvas) {
             // заливка канвы цветом
@@ -1418,13 +1509,32 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                 p.setColor(colors.get(indexChisto++).first);
                 Log.i("Nigga","" +colors.get(indexChisto - 1).first + "Jopa = " + colors.get(indexChisto - 1).second.getDrawingCacheBackgroundColor());
                 canvas.drawPath(path,p);
+
+
+//                float[] aproximate = path.approximate(100);
+//
+//                float prevX = 0;
+//                float prevY = 0;
+//                for (int i = 0;i < aproximate.length - 1;i++){
+//
+//                    float x = aproximate[i];
+//                    float y = aproximate[i + 1];
+//
+//                    if (i < 1) {
+//                        prevX = x;
+//                        prevY = y;
+//                        continue;
+//                    }
+//
+//                    graphs.addFixture(new Link(new Vector2(prevX,prevY), new Vector2(x,y)));
+//
+//                    prevX = x;
+//                    prevY = y;
+//                }
+
             }
             p.setColor(Color.RED);
             p.setStyle(Paint.Style.STROKE);
-            float radius = (float)Math.log(radiusOfP);
-
-            float xOfPlayer = playerPos.x*(float)xMult + (float)xCentre;
-            float yOfPlayer = playerPos.y*(float)yMult + (float)yCentre;
 //            canvas.drawCircle(xOfPlayer,yOfPlayer,radius,p);
 
 //            canvas.drawPath(circleOfLife,p);
@@ -1451,7 +1561,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
                 body.Refresh();
 
-                Log.i("PosRect", "xStart = " + body.posStart.x + " yStart = " + body.posStart.y + "xEnd = " + body.posEnd.x + " yEnd = " + body.posEnd.y);
+//                Log.i("PosRect", "xStart = " + body.posStart.x + " yStart = " + body.posStart.y + "xEnd = " + body.posEnd.x + " yEnd = " + body.posEnd.y);
 
 
                 PointF rect = ToDisplayCoords(body.posStart.x,body.posStart.y);
@@ -1466,10 +1576,13 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             for (Body body : circles){
 
 
-                PointF circle = ToDisplayCoords(body.getTransform().getTranslationX(),body.getTransform().getTranslationY());
-                canvas.drawCircle((float) circle.x,circle.y,0.5f* (float) xMult,p);
+                Ellipse ellipse = (Ellipse) body.getFixture(0).getShape();
 
-                Log.i("Pos", "x = " + body.getTransform().getTranslationX() + " y = " + body.getTransform().getTranslationY());
+                PointF circleStart = ToDisplayCoords(body.getTransform().getTranslationX() - ellipse.getHalfWidth(),body.getTransform().getTranslationY() - ellipse.getHalfHeight());
+
+                PointF circleEnd = ToDisplayCoords(body.getTransform().getTranslationX() + ellipse.getHalfWidth(),body.getTransform().getTranslationY() + ellipse.getHalfHeight());
+
+                canvas.drawOval(circleStart.x,circleStart.y,circleEnd.x,circleEnd.y,p);
 
             }
 
@@ -1596,8 +1709,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                 ArrayList<FormulSistem.Pair<Double,Double>> curGraph = allCalculetblePoints.get(func);
 //                Log.i("KeysAndGays", " key = " + func + " gay = " +  allCalculetblePoints.containsKey(func) + "jopa = " + allCalculetblePoints.keySet());
                 if (curGraph == null){continue;}
-                Log.i("Anal","ajfop");
-                Log.i("Collision","step = " + step + " xGraph = " + curGraph.get(curGraph.size() - 1).element1 + " this.x = " + this.x + " yGraph = " + curGraph.get(curGraph.size() - 1).element2 + " this.y = " + this.y );
+//                Log.i("Collision","step = " + step + " xGraph = " + curGraph.get(curGraph.size() - 1).element1 + " this.x = " + this.x + " yGraph = " + curGraph.get(curGraph.size() - 1).element2 + " this.y = " + this.y );
 
                 for (FormulSistem.Pair<Double,Double> point : curGraph){
                     if (point.element1 - (this.x ) < step){
