@@ -131,12 +131,8 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
     Map<String,Double> XYmaxesAndMines = new HashMap<>();
 
-    ArrayList<ImageButton> imageButtons = new ArrayList<>();
-    ArrayList<Pair<EditText,Integer>> formulaImputs = new ArrayList<>();
-
     ArrayList<String> funcsWeDo = new ArrayList<>();
     int funcCount = 0;
-    boolean isClickAlready;
 
     //Цена деления
     double Cx = 1;
@@ -160,8 +156,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
     int touchCounter = 0;
 
-    ArrayList<Object2D> _2Dobjects = new ArrayList<>();
-
 //  Colors
     ArrayList<Pair<Integer,ImageButton>> colors = new ArrayList<>();
     int colorNow = Color.RED;
@@ -169,10 +163,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
     ImageButton currentViewColorChange;
     HashMap<String,Integer> colorRGB = new HashMap<>();
     int currentIndexOfChangeColorBtn = 0;
-
-    LayerDrawable curLayerToChange;
-
-    boolean lastDraw = true;
 
 
     static class TouchForMove{
@@ -199,19 +189,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
     }
 
 
-    int cursorPosition;
-    String textString = "";
-    TextView outText;
-
-
-    PointF playerPos = new PointF();
-    float speed = 0.01f;
-    int koefX;
-    int koefY;
-    float radiusOfP = 1000.0f;
-
     boolean cameraFollowPlayer = false;
-
 
     int deltaTime = 1;
 
@@ -322,6 +300,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         for (int i = 0;i < colorChangeMenu.getChildCount() - 1;i++){
             SeekBar seekBar = (SeekBar) colorChangeMenu.getChildAt(i);
             seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @SuppressLint("NonConstantResourceId")
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     switch (seekBar.getId()){
@@ -389,29 +368,26 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             ImageButton newColorChange = (ImageButton) linH.getChildAt(1);
 
 
-            newColorChange.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (colorChangeMenu.getVisibility() == View.VISIBLE){
-                        colorChangeMenu.setVisibility(View.GONE);
-                        return;
-                    }
-
-                    currentViewColorChange = (ImageButton) v;
-
-                    ImageView colorView = (ImageView) colorChangeMenu.getChildAt(3);
-
-                    for (int i = 0;i < colors.size();i++){
-                        Pair<Integer,ImageButton> p = colors.get(i);
-                        if (p.second.equals(v)){
-                            colorNow = p.first;
-                            currentIndexOfChangeColorBtn = i;
-                        }
-                    }
-                    colorChangeMenu.setVisibility(View.VISIBLE);
-
-                    colorView.setBackgroundColor(colorNow);
+            newColorChange.setOnClickListener(v12 -> {
+                if (colorChangeMenu.getVisibility() == View.VISIBLE){
+                    colorChangeMenu.setVisibility(View.GONE);
+                    return;
                 }
+
+                currentViewColorChange = (ImageButton) v12;
+
+                ImageView colorView = (ImageView) colorChangeMenu.getChildAt(3);
+
+                for (int i = 0;i < colors.size();i++){
+                    Pair<Integer,ImageButton> p = colors.get(i);
+                    if (p.second.equals(v12)){
+                        colorNow = p.first;
+                        currentIndexOfChangeColorBtn = i;
+                    }
+                }
+                colorChangeMenu.setVisibility(View.VISIBLE);
+
+                colorView.setBackgroundColor(colorNow);
             });
             Random random = new Random();
             colors.add(new Pair<>(random.nextInt(),newColorChange));
@@ -438,18 +414,17 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         closeFormInput.setOnClickListener(v -> {
             isCloseFormInput = !isCloseFormInput;
 
-            ConstraintLayout formInputContainer1 = (ConstraintLayout) findViewById(R.id.constraintLayoutActiv3IN);
 
 
             if (isCloseFormInput){
                 closeFormInput.setImageResource(R.drawable.open_formula_input);
 
-                formInputContainer1.setVisibility(View.GONE);
+                formInputContainer.setVisibility(View.GONE);
 
             }else{
                 closeFormInput.setImageResource(R.drawable.close_formula_input);
 
-                formInputContainer1.setVisibility(View.VISIBLE);
+                formInputContainer.setVisibility(View.VISIBLE);
             }
 
         });
@@ -518,11 +493,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
                         double[] xDiffA = new double[]{0,0};
                         double[] yDiffA = new double[]{0,0};
-                        int secondTouchIndex = 1;
-                        int firstTuuchIndex = 0;
-                        if (event.getActionIndex() == 0){secondTouchIndex = 1;}
-                        int posOrNegDiffX = 1;
-                        int posOrNegDiffY = 1;
                         int whoHeier = 0;
                         int whoStayRight = 0;
                         if (event.getX(0) < event.getX(1)){whoStayRight = 1;}
@@ -533,15 +503,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                         yDiffA[0] = (float)scaleTouches.get(0).lastYMovePos - event.getY(0);
                         xDiffA[1] = (float)scaleTouches.get(1).lastXMovePos - event.getX(1);
                         yDiffA[1] = (float)scaleTouches.get(1).lastYMovePos - event.getY(1);
-
-                        double[] sumDiff = new double[]{0,0};
-//                        sumDiff[0] += Math.sqrt(Math.pow(xDiffA[0],2) + Math.pow(yDiffA[0],2));
-                        for (int i = 0;i < pointerCount;i++){
-                            if (Math.abs(xDiffA[i]) > Math.abs(yDiffA[i])){sumDiff[i] = xDiffA[i];}else{sumDiff[i] = yDiffA[i];}
-                        }
-//                        sumDiff[1] = Math.sqrt(Math.pow(xDiffA[1],2) + Math.pow(yDiffA[1],2));
-
-                        double superSumDiff = sumDiff[0] + sumDiff[1];
 
                         double speed = 2;
 
@@ -585,7 +546,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                         rightMove = (touch.lastXMovePos - event.getX()) > 0;
                         upMove = !(yDiff > 0);
 
-//                        Log.i("xDiff","" + xDiff);
 
                         constraintLayout.removeView(drawView);
                         constraintLayout.addView(drawView,0,constraintLayout.getLayoutParams());
@@ -615,7 +575,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
 
 
-        float velocityAdd = 5f;
+        float velocityAdd = 1f;
 
         upBtn.setOnTouchListener((v, event) -> {
 
@@ -630,12 +590,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
             }else if
             (action == MotionEvent.ACTION_UP){
-
-//                for (Body circle : circles){
-//                    Vector2 velocity = circle.getLinearVelocity();
-//                    circle.setLinearVelocity(velocity.x,velocity.y - 1);
-//                }
-
             }
             return false;
         });
@@ -652,11 +606,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
             }else if
             (action == MotionEvent.ACTION_UP){
-
-//                for (Body circle : circles){
-//                    Vector2 velocity = circle.getLinearVelocity();
-//                    circle.setLinearVelocity(velocity.x,velocity.y + 1);
-//                }
 
             }
             return false;
@@ -675,11 +624,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             }else if
             (action == MotionEvent.ACTION_UP){
 
-//                for (Body circle : circles){
-//                    Vector2 velocity = circle.getLinearVelocity();
-//                    circle.setLinearVelocity(velocity.x - 1,velocity.y);
-//                }
-
             }
             return false;
         });
@@ -696,11 +640,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
             }else if
             (action == MotionEvent.ACTION_UP){
-
-//                for (Body circle : circles){
-//                    Vector2 velocity = circle.getLinearVelocity();
-//                    circle.setLinearVelocity(velocity.x + 1,velocity.y);
-//                }
 
             }
             return false;
@@ -720,20 +659,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                         @Override
                         public void run() {
                             RefreshDrawParametrs();
-//
-//                            if (koefX != 0 || koefY != 0){
-//                                playerPos.x += koefX * speed;
-//                                playerPos.y += koefY * speed;
-////                                RefreshDrawParametrs();
-//                            }
-//
-//                            if (cameraFollowPlayer){
-//                                xMin = (double)playerPos.x - (xMax - xMin)/2.0;
-//                                xMax = (double)playerPos.x + (xMax - xMin)/2.0;
-//                                yMin = (double)-playerPos.y - (yMax - yMin)/2.0;
-//                                yMax = (double)-playerPos.y + (yMax - yMin)/2.0;
-////                                RefreshDrawParametrs();
-//                            }
                         }
                     });
                 }
@@ -749,7 +674,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
                 for (Body ball : circles){
-//                    ball.getFixture(0).setFriction(FrictionSeekBar.getProgress());
                     ball.getFixture(0).setFriction(FrictionSeekBar.getProgress());
                 }
 
@@ -790,32 +714,15 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         ImageButton cameraFollowsPlayer = findViewById(R.id.cameraFollowsPlayer);
         cameraFollowsPlayer.setOnClickListener(v -> {
 
-            circles.get(0).getFixture(0).setDensity(ball.getFixture(0).getDensity() + 10);
+            ball.getFixture(0).setDensity(ball.getFixture(0).getDensity() + 10);
         });
 
-
-
-
-//        _2Dobjects.add(new Rect2D(-2,0,1));
-//        _2Dobjects.get(0).setSpeed(new MyVector2D(0.001f,0.002f));
-//        _2Dobjects.get(0).setMass(10);
-//        _2Dobjects.get(0).elastic = 0.5f;
-//
-//        _2Dobjects.add(new Rect2D(3,0,1));
-//        _2Dobjects.get(1).setSpeed(new MyVector2D(0.001f,0.001f));
-//        _2Dobjects.get(1).setMass(10);
-//        _2Dobjects.get(1).elastic = 0.5f;
-//
-//        _2Dobjects.add(new Rect2D(5,2,1));
-//        _2Dobjects.get(2).setSpeed(new MyVector2D(0.002f,0.001f));
-//        _2Dobjects.get(2).setMass(10);
-//        _2Dobjects.get(2).elastic = 0.5f;
 
         /*------Create a world------*/
         world=new World<Body>();//Create the world
 //        world.setGravity(new Vector2(0,-10));//The acceleration of gravity is set to 10m·s^(-2)
         //The following are two other ways of writing
-         world.setGravity(0,-1);
+         world.setGravity(0,0);
         // world.setGravity(Vector2.create(10,-Math.PI/2));
         world.getSettings().setStepFrequency(0.01);//Set the step frequency, the interval between two calculations is 1 millisecond
 //        world.setGravity(0,-1);
@@ -823,12 +730,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
         /*------Create entity------*/
 
-
-
-//        Body line = new Body();
-//        line.setMass(MassType.INFINITE);
-//        line.addFixture(new Link(new Vector2(0,0),new Vector2(5,0)));
-//        world.addBody(line);
 
         graphs = new Body();
         graphs.setMass(MassType.INFINITE);
@@ -897,67 +798,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
         /*------Create entity------*/
 
-//        _2Dobjects.add(new Rect2D(4,0,2));
-//        _2Dobjects.get(1).setSpeed(new MyVector2D(0.003f,0.001f));
-//        _2Dobjects.get(1).setMass(10);
-//
-//        _2Dobjects.add(new Rect2D(5,0,2));
-//        _2Dobjects.get(1).setSpeed(new MyVector2D(0.001f,0.003f));
-//        _2Dobjects.get(1).setMass(10);
-
-//        outText = findViewById(R.id.outText);
-//        Button cosBtn = findViewById(R.id.cosBtn);
-//        Button sinBtn = findViewById(R.id.sinBtn);
-//        Button tgBtn = findViewById(R.id.tgBtn);
-//        Button ctgBtn = findViewById(R.id.ctgBtn);
-//        ImageButton spaceBtn = findViewById(R.id.spaceBtn);
-//
-////        Thread t = new Thread() {
-////
-////            @Override
-////            public void run() {
-////                while (!isInterrupted()) {
-////                    try {
-////                        Thread.sleep(10);
-////                    } catch (InterruptedException e) {
-////                        e.printStackTrace();
-////                    }
-////                    runOnUiThread(new Runnable() {
-////                        @Override
-////                        public void run() {
-////                            outText.setText(textString);
-////                        }
-////                    });
-////                }
-////            }
-////        };
-////
-////        t.start();
-//
-//
-//        outText.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                return false;
-//            }
-//        });
-//
-//        cosBtn.setOnClickListener(v -> {
-//            textString = textString.substring(0,cursorPosition) + "cos()" + textString.substring(cursorPosition);
-//        });
-//        sinBtn.setOnClickListener(v -> {
-//            textString = textString.substring(0,cursorPosition) + "sin()" + textString.substring(cursorPosition);
-//        });
-//        tgBtn.setOnClickListener(v -> {
-//            textString = textString.substring(0,cursorPosition) + "tg()" + textString.substring(cursorPosition);
-//        });
-//        ctgBtn.setOnClickListener(v -> {
-//            textString = textString.substring(0,cursorPosition) + "ctg()" + textString.substring(cursorPosition);
-//        });
-//        spaceBtn.setOnClickListener(v ->{
-//            textString = textString.substring(0,cursorPosition) + " " + textString.substring(cursorPosition);
-//        });
-
 
 
 //        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -966,6 +806,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
     }
 
 
+    //Один кадр
     void RefreshDrawParametrs(){
 
 
@@ -973,100 +814,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         world.step(1);
 
         Log.i("FixtureCount","" + graphs.getFixtureCount());
-//        if (lastDraw){graphs.removeAllFixtures();}
-//        Log.i("AfterFixtureCount","" + graphs.getFixtureCount());
-//        for (Object2D obj : _2Dobjects){
-//
-//
-//
-//
-//            if (obj.getClass().equals(Rect2D.class)){
-//                Rect2D rect = (Rect2D) obj;
-//
-//                if (rect.OnCollision()){
-//
-//                    if (!(rect.color == Color.BLUE)){rect.color = Color.GREEN;}
-//
-//                    for (Object2D objInCol : rect.objInCollision.first){
-//
-//                        if (rect.equals(objInCol)){continue;}
-//                        objInCol.color = Color.BLUE;
-//
-//                        float movementAngle1 = (float) Math.atan(rect.speed.y/rect.speed.x);
-//                        float movementAngle2 = (float) Math.atan(objInCol.speed.y/objInCol.speed.x);
-//
-//                        float scalarSpeed1 = (float) Math.sqrt(Math.pow(rect.speed.x,2) + Math.pow(rect.speed.y,2));
-//                        float scalarSpeed2 = (float)  Math.sqrt(Math.pow(objInCol.speed.x,2) + Math.pow(objInCol.speed.y,2));
-//
-//
-//                        float collisionAngle = (float) Math.PI;
-//
-////                        Log.i("ZnachMove","movementAngle1 = " + movementAngle1 + " movementAngle2 = " +
-////                                movementAngle2 + " scalarSpeed1 = " + scalarSpeed1 + " scalarSpeed2 = " + scalarSpeed2 + " collisionAngle = " + collisionAngle);
-//
-//
-//
-//
-//
-////                        if (rect.speed.x < 0){scalarSpeed1 *= -1;}
-////                        if (objInCol.speed.x < 0){scalarSpeed2 *= -1;}
-////                        float k =
-////
-////                        rect.speed.x = (rect.mass - rect.elastic * objInCol.mass) * scalarSpeed1 + objInCol.mass*(1 + rect.elastic)*scalarSpeed2;
-////                        rect.speed.x /= rect.mass + objInCol.mass;
-////
-////                        if (rect.speed.y > 0){scalarSpeed1 *= -1;}
-////                        if (objInCol.speed.y > 0){scalarSpeed2 *= -1;}
-////
-////                        rect.speed.y = (rect.mass - rect.elastic * objInCol.mass) * scalarSpeed1 + objInCol.mass*(1 + rect.elastic)*scalarSpeed2;
-////                        rect.speed.y /= rect.mass + objInCol.mass;
-//
-//
-//
-////                        rect.speed.x = (float) ((scalarSpeed1 * Math.cos(movementAngle1 - collisionAngle)*(rect.mass - objInCol.mass) +
-////                                2 * objInCol.mass * scalarSpeed2 * Math.cos(movementAngle2 - collisionAngle))*Math.cos(collisionAngle)
-////                                /(rect.mass + objInCol.mass)
-////                                + scalarSpeed1 * Math.sin(movementAngle1 - collisionAngle) * Math.cos(collisionAngle + Math.PI/2));
-////
-////                        rect.speed.y = (float) ((scalarSpeed1 * Math.cos(movementAngle1 - collisionAngle)*(rect.mass - objInCol.mass) +
-////                                2 * objInCol.mass * scalarSpeed2 * Math.cos(movementAngle2 - collisionAngle))*Math.sin(collisionAngle)
-////                                /(rect.mass + objInCol.mass)
-////                                + scalarSpeed1 * Math.sin(movementAngle1 - collisionAngle) * Math.sin(collisionAngle + Math.PI/2));
-//
-////                        objInCol.speed.x = (float) ((scalarSpeed2 * Math.cos(movementAngle2 - collisionAngle)*(objInCol.mass - rect.mass) +
-////                                2 * rect.mass * scalarSpeed1 * Math.cos(movementAngle1 - collisionAngle))*Math.cos(collisionAngle)
-////                                /(rect.mass + objInCol.mass)
-////                                + scalarSpeed2 * Math.sin(movementAngle2 - collisionAngle) * Math.cos(collisionAngle + Math.PI/2));
-////
-////                        objInCol.speed.y = (float) ((scalarSpeed2 * Math.cos(movementAngle2 - collisionAngle)*(objInCol.mass - rect.mass) +
-////                                2 * rect.mass * scalarSpeed1 * Math.cos(movementAngle1 - collisionAngle))*Math.sin(collisionAngle)
-////                                /(rect.mass + objInCol.mass)
-////                                + scalarSpeed2 * Math.sin(movementAngle2 - collisionAngle) * Math.sin(collisionAngle + Math.PI/2));
-//
-//
-//
-//                    }
-//                }else{
-//                    rect.color = Color.RED;
-//                }
-//            }
-//
-//
-//            if (obj.OnBorderCollision() == WhatCollisionOn.WIDTH){
-//                obj.speed.x *= -1;
-//                obj.speed.y *= 1;
-//            }
-//            if (obj.OnBorderCollision() == WhatCollisionOn.HEIGHT){
-//                obj.speed.x *= 1;
-//                obj.speed.y *= -1;
-//            }
-//
-//
-//            obj.setX(obj.x + obj.speed.x);
-//            obj.setY(obj.y + obj.speed.y);
-//
-//        }
-
 
 
         LinearLayout lin = (LinearLayout)findViewById(R.id.formula_inputs_container_container);
@@ -1100,16 +847,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
     }
 
 
-
-    //Пока не нужные функции
-    protected double[] XYMaxValues(){
-        Bundle arguments = getIntent().getExtras();
-        return new double[]{(Double)arguments.get("xMin"),(Double)arguments.get("xMax"),(Double)arguments.get("yMin"),(Double)arguments.get("yMax")};
-    }
-    protected String WhatFunctionWeDo(){
-        Bundle arguments = getIntent().getExtras();
-        return String.valueOf(arguments.get("funcName"));
-    }
     //Кол-во знаков до запятой
     protected int DecimalPlaces(double Value){
         int decimalPlases = 0;
@@ -1255,7 +992,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                     counter++;
 
 
-//                    polygon.add(new Vector2(point.x,point.y));
 //                    Доделать надо, чтобы могли быть пробелы
                     if (prevPoint != null && counter >= approximationAccuracy){
                         counter = 0;
@@ -1269,12 +1005,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                     if (i < 1){prevPoint = curPoint;}
 
                 }
-
-//                for (int i = calculetblePoints.size() - 1;i > 0;i--){
-//                    polygon.add(new Vector2(calculetblePoints.get(i).element1 + 0.1,calculetblePoints.get(i).element2 + 0.1));
-//                }
-//                polygon.add(new Vector2(calculetblePoints.get(0).element1,calculetblePoints.get(0).element2));
-
 
             }
 
@@ -1428,6 +1158,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                 }
                 p.setAlpha(255);
 
+                // 10^n отображение при масштабировании.
 //                if (Cx >= 1000){
 //                    if (yCentre < 0){
 //                        canvas.drawText("10", (float)(x), (float) (height*0.04), p);
@@ -1492,7 +1223,7 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
 
             p.setColor(Color.RED);
 
-            //Строиться с точностью до 0.01*ЦенаДеления
+            //Строиться с точностью до 0.005*ЦенаДеления
             step = 0.005*Cx;
 
             ArrayList<Path> paths = FuncPointsCalculate(xMult,yMult,xCentre,yCentre,step);
@@ -1510,51 +1241,9 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
                 Log.i("Nigga","" +colors.get(indexChisto - 1).first + "Jopa = " + colors.get(indexChisto - 1).second.getDrawingCacheBackgroundColor());
                 canvas.drawPath(path,p);
 
-
-//                float[] aproximate = path.approximate(100);
-//
-//                float prevX = 0;
-//                float prevY = 0;
-//                for (int i = 0;i < aproximate.length - 1;i++){
-//
-//                    float x = aproximate[i];
-//                    float y = aproximate[i + 1];
-//
-//                    if (i < 1) {
-//                        prevX = x;
-//                        prevY = y;
-//                        continue;
-//                    }
-//
-//                    graphs.addFixture(new Link(new Vector2(prevX,prevY), new Vector2(x,y)));
-//
-//                    prevX = x;
-//                    prevY = y;
-//                }
-
             }
             p.setColor(Color.RED);
             p.setStyle(Paint.Style.STROKE);
-//            canvas.drawCircle(xOfPlayer,yOfPlayer,radius,p);
-
-//            canvas.drawPath(circleOfLife,p);
-//            canvas.drawRect(xOfPlayer,yOfPlayer,xOfPlayer + radius*(float)xMult,yOfPlayer + radius*(float)yMult,p);
-
-//            Rect2D rect = (Rect2D) _2Dobjects.get(0);
-
-//            for(Object2D obj :  _2Dobjects){
-//
-//                Rect2D rect = (Rect2D)obj;
-//
-//                Log.i("rectPos","x = " + rect.x + " y = " + rect.y);
-//
-//                p.setColor(rect.color);
-//                canvas.drawLine(rect.x*(float) xMult + (float) xCentre,-rect.y*(float) yMult + (float) yCentre,(rect.x + rect.speed.x*1000)*(float) xMult+ (float) xCentre, -(rect.y + rect.speed.y*1000)*(float) yMult + (float) yCentre,p);
-//
-//                canvas.drawRect((float) (rect.x*xMult + xCentre),(float) (-rect.y*yMult + yCentre),(float) ((rect.x + rect.side)*xMult + xCentre),(float) (-(rect.y + rect.side)*yMult + yCentre),p);
-//            }
-
-
 
 
             for (Sides body : sidesOfDisplay){
@@ -1674,220 +1363,6 @@ public class MainActivity2 extends AppCompatActivity implements View.OnTouchList
         }
     }
 
-    class Object2D{
-        MyVector2D speed;
-        protected float y;
-        protected float x;
-        protected int color;
-        protected float elastic;
-
-        protected float mass;
-
-        Object2D(){
-        }
-
-        public void setX(float x) {
-            this.x = x;
-        }
-
-        public void setY(float y) {
-            this.y = y;
-        }
-
-        public void setMass(float mass) {
-            this.mass = mass;
-        }
-
-        public WhatCollisionOn OnBorderCollision(){
-            if ((x >= xMax) || (x <= xMin)){return WhatCollisionOn.WIDTH;}
-            if ((y >= yMax) || (y <= yMin)){return WhatCollisionOn.HEIGHT;}
-            return null;
-        }
-
-        public boolean OnCollision() {
-            for (String func : funcsWeDo){
-                ArrayList<FormulSistem.Pair<Double,Double>> curGraph = allCalculetblePoints.get(func);
-//                Log.i("KeysAndGays", " key = " + func + " gay = " +  allCalculetblePoints.containsKey(func) + "jopa = " + allCalculetblePoints.keySet());
-                if (curGraph == null){continue;}
-//                Log.i("Collision","step = " + step + " xGraph = " + curGraph.get(curGraph.size() - 1).element1 + " this.x = " + this.x + " yGraph = " + curGraph.get(curGraph.size() - 1).element2 + " this.y = " + this.y );
-
-                for (FormulSistem.Pair<Double,Double> point : curGraph){
-                    if (point.element1 - (this.x ) < step){
-                        return true;
-                    }
-                    if (point.element2 - this.y < step){
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-
-        public void setSpeed(MyVector2D speed) {
-            this.speed = speed;
-        }
-    }
-
-    class Rect2D extends Object2D{
-        float side;
-        PointF start = new PointF(this.x,this.y);
-        PointF end = new PointF(this.x + side,this.y + side);
-
-        @Override
-        public void setX(float x) {
-            super.setX(x);
-            start.x = x;
-            end.x = x + side;
-        }
-
-        @Override
-        public void setY(float y) {
-            super.setY(y);
-            start.y = y;
-            end.y = y + side;
-        }
-
-        public void setSide(float side){
-            this.side = side;
-        }
-
-        Pair<ArrayList<Object2D>,Float> objInCollision = new Pair<>(new ArrayList<>(),0f);
-
-        Rect2D(float x,float y,float side){
-            this.x = x;
-            this.y = y;
-            this.side = side;
-        }
-
-        @Override
-        public WhatCollisionOn OnBorderCollision(){
-            if ((x + side >= xMax) || (x <= xMin)){return WhatCollisionOn.WIDTH;}
-            if ((y + side >= yMax) || (y <= yMin)){return WhatCollisionOn.HEIGHT;}
-            return null;
-        }
-
-
-
-        @Override
-        public boolean OnCollision() {
-            this.start.x = this.x;
-            this.start.y = this.y;
-            this.end.x = this.x + side;
-            this.end.y = this.y + side;
-
-            boolean onCollision = false;
-            for (Object2D obj : _2Dobjects){
-
-                if (obj.getClass().equals(Rect2D.class)){
-
-                    Rect2D anotherRect = (Rect2D) obj;
-
-//                    Log.i("SwingerParty","x = " + anotherRect.x + " y = " + anotherRect.x + " ");
-
-
-                    if (anotherRect.equals(this)){continue;}
-                    objInCollision.first.remove(anotherRect);
-
-
-                    if (
-                            this.start.x < anotherRect.end.x &&
-                            this.end.x > anotherRect.start.x && 
-                            this.start.y < anotherRect.end.y &&
-                            this.end.y > anotherRect.start.y
-                    )
-                    {
-//                        if (
-//                                this.start.y < anotherRect.end.y &&
-//                                this.end.y > anotherRect.start.y &&
-//                                this.end.x < anotherRect.start.x + anotherRect.side/2
-//                        ){
-//                            objInCollision.second =
-//                        }
-
-                        objInCollision.first.add(anotherRect);
-                        onCollision = true;
-                    }
-
-//                    float newXRect = this.x + this.speed.x;
-//                    float newYRect = this.y + this.speed.y;
-//
-//                    float newXAnotherRect = anotherRect.x + anotherRect.speed.x;
-//                    float newYAnotherRect = anotherRect.y + anotherRect.speed.y;
-//
-//                    if (IsInBetween(newYRect,anotherRect.y - anotherRect.side,newYAnotherRect) && !IsInBetween(newXRect,anotherRect.x - anotherRect.side,newXAnotherRect))
-//                    {
-//                        objInCollision.add(anotherRect);
-//                        onCollision = true;
-//                    }
-
-                }
-            }
-            return onCollision;
-        }
-    }
-
-    class Circle2D extends Object2D{
-        float radius;
-
-        Circle2D(float x,float y,float radius){
-            this.x = x;
-            this.y = y;
-            this.radius = radius;
-        }
-
-        @Override
-        public WhatCollisionOn OnBorderCollision(){
-            if ((x + radius >= xMax) || (x - radius <= xMin)){return WhatCollisionOn.WIDTH;}
-            if ((y + radius >= yMax) || (y - radius <= yMin)){return WhatCollisionOn.HEIGHT;}
-            return null;
-        }
-
-
-        @Override
-        public boolean OnCollision() {
-            for (String func : funcsWeDo){
-                ArrayList<FormulSistem.Pair<Double,Double>> curGraph = allCalculetblePoints.get(func);
-//                Log.i("KeysAndGays", " key = " + func + " gay = " +  allCalculetblePoints.containsKey(func) + "jopa = " + allCalculetblePoints.keySet());
-                if (curGraph == null){continue;}
-
-                for (FormulSistem.Pair<Double,Double> point : curGraph){
-//                    if (Math.pow(point.element1 - this.x,2) + Math.pow(point.element2 - this.y,2) == this.radius){
-//                        Log.i("CollisionDJIOQW","step = " + step + " xGraph = " + point.element1 + " this.x = " + this.x + " yGraph = " + point.element2 + " this.y = " + this.y);
-//                        return true;
-//                    }
-
-                    if ((((this.x - radius) < point.element1) && (point.element1 < (this.x + radius))) && (((this.y - radius) < point.element2) && (point.element2 < (this.y + radius)))){
-                        Log.i("CollisionDJIOQW","step = " + step + " xGraph = " + point.element1 + " this.x = " + this.x + " yGraph = " + point.element2 + " this.y = " + this.y);
-
-
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-    }
-
-    enum WhatCollisionOn{
-        WIDTH,
-        HEIGHT,
-        LEFT,
-        RIGHT,
-        TOP,
-        BOTTOM
-    }
-
-
-
-    class MyVector2D{
-        float x;
-        float y;
-        MyVector2D(float x,float y){
-            this.x = x;
-            this.y = y;
-        }
-    }
 
     boolean IsInBetween(float x,float startx,float endx){
         return (x > startx && x < endx) || (x < startx && x > endx);
