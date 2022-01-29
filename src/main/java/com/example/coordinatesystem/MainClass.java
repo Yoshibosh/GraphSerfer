@@ -9,16 +9,17 @@ import org.dyn4j.world.World;
 
 import javax.swing.*;
 import javax.swing.border.StrokeBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
-import java.awt.Graphics2D;
-import java.awt.Color;
 
 
-
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.text.Normalizer;
 import java.util.*;
 
@@ -151,13 +152,15 @@ public class MainClass{
 
         frame = new JFrame();
         frame.setSize(1000,1000);
-        frame.setLayout(null);
+        frame.setLayout(new GridLayout(1,2));
         frame.setVisible(true);
+//        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+//        frame.setUndecorated(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         drawView = new DrawView(1000,1000);
-        drawView.setVisible(true);
-        drawView.setSize(1000,1000);
+//        drawView.setVisible(true);
+//        drawView.setSize(1000,1000);
         frame.add(drawView);
 
 
@@ -198,12 +201,48 @@ public class MainClass{
 //        colors.add(new FormulSistem.Pair<>(firstColorChanger.getDrawingCacheBackgroundColor(),firstColorChanger));
 
 
+        JPanel rightBox = new JPanel();
+        rightBox.setLayout(new GridLayout(5,1));
         FormulaInput = new JTextArea("x^2");
-        FormulaInput.setSize(200,100);
-        FormulaInput.setVisible(true);
-        FormulaInput.setAlignmentX(1);
-        FormulaInput.setAlignmentY(1);
-        frame.add(FormulaInput);
+//        FormulaInput.setSize(rightBox.getWidth(),FormulaInput.getHeight());
+//        FormulaInput.setSize(200,100);
+        rightBox.setVisible(true);
+        rightBox.add(FormulaInput);
+
+        frame.add(rightBox);
+
+        JSlider friction = new JSlider();
+        friction.setMaximum(1000);
+        friction.setMinimum(0);
+        friction.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+
+                for (Body circle : circles){
+                    circle.getFixture(0).setFriction(friction.getValue());
+                }
+
+            }
+        });
+
+        JSlider restitution = new JSlider();
+        restitution.setMaximum(100);
+        restitution.setMinimum(0);
+        restitution.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+
+                System.out.println("RestituationValue " + restitution.getValue() );
+
+                for (Body circle : circles){
+                    circle.getFixture(0).setRestitution(restitution.getValue()/100.0);
+                }
+
+            }
+        });
+
+        rightBox.add(friction);
+        rightBox.add(restitution);
 
         colorRGB.put("RED",Color.BLACK);
         colorRGB.put("GREEN",Color.BLACK);
@@ -385,12 +424,12 @@ public class MainClass{
 //               return false;
 //           }
 //       });
-        frame.addMouseListener(new MouseListener() {
+        drawView.addMouseListener(new MouseListener() {
+
 
 
             @Override
             public void mouseClicked(MouseEvent e) {
-
 
 
             }
@@ -398,6 +437,7 @@ public class MainClass{
             @Override
             public void mousePressed(MouseEvent e) {
 
+                frame.requestFocus();
 
                 touch = new TouchForMove(e.getID(),e.getX(),e.getY(),xMax,yMax,xMin,yMin);
 
@@ -420,7 +460,7 @@ public class MainClass{
 
             }
         });
-        frame.addMouseMotionListener(new MouseMotionListener() {
+        drawView.addMouseMotionListener(new MouseMotionListener() {
             @Override
             public void mouseDragged(MouseEvent e) {
 
@@ -455,22 +495,22 @@ public class MainClass{
             }
         });
 
-        frame.addMouseWheelListener(new MouseWheelListener() {
+        drawView.addMouseWheelListener(new MouseWheelListener() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 if (!isFirst2Touch){
-                            CentreOf2Touches.x = e.getX();
-                            CentreOf2Touches.y = e.getY();
-                        }
+                    CentreOf2Touches.x = e.getX();
+                    CentreOf2Touches.y = e.getY();
+                }
 
                         double diff = e.getPreciseWheelRotation();
 
-                        double speed = 2;
+                        double speed = 50;
 
-                        xMax += speed*(1 - CentreOf2Touches.x/width)*(diff)*(xMax - xMin)/(width);
-                        xMin += speed*(CentreOf2Touches.x/width)*(- diff)*(xMax - xMin)/(width);
-                        yMax += speed*(CentreOf2Touches.y/height)*(-diff)*(yMax - yMin)/(height);
-                        yMin += speed*(1 - CentreOf2Touches.y/height)*(+diff)*(yMax - yMin)/(height);
+                        xMax += speed*(1 - CentreOf2Touches.x/drawView.width)*(diff)*(xMax - xMin)/(drawView.width);
+                        xMin += speed*(CentreOf2Touches.x/drawView.width)*(- diff)*(xMax - xMin)/(drawView.width);
+                        yMax += speed*(1 - CentreOf2Touches.y/drawView.height)*(diff)*(yMax - yMin)/(drawView.height);
+                        yMin += speed*(CentreOf2Touches.y/drawView.height)*(-diff)*(yMax - yMin)/(drawView.height);
 
 //                        Log.i("XYMAXMININTOUCH","[xMax = " + xMax + ", xMin = " + xMin + ",yMax = " + yMax + ", yMin = " + yMin + "] + ActionIndex = " + e.getPointerId(pointerIndex) + " size:" + scaleTouches.size());
 
@@ -633,56 +673,60 @@ public class MainClass{
             ball.getTransform().setTranslation(i,i);//Set the Y coordinate of the ball to 10m
             ball.setMass(MassType.NORMAL);//Automatically calculate the mass of the ball
             ball.setLinearVelocity(new Vector2(1,1));
-            ball.getFixture(0).setFriction(10);
-            ball.getFixture(0).setDensity(2);
 
             world.addBody(ball);
             circles.add(ball);
         }
 
 
-
+        Convex fixture;
 
         //bottom
         ground =new Body();//The same method to create the ground
-        ground.addFixture(new Rectangle((xMax - xMin),0.1));//The ground is a rectangle, 100m wide and 0.1m high
-        ground.getTransform().setTranslation(xMin + (xMax - xMin)/2,yMin);//Move the ground down 0.05m to ensure that the Y coordinate of the upper edge of the ground is 0
+        fixture = new Segment(new Vector2(xMin,yMin), new Vector2(xMax,yMin));
+        ground.addFixture(fixture);//The ground is a rectangle, 100m wide and 0.1m high
+//        ground.getTransform().setTranslation(xMin + (xMax - xMin)/2,yMin);//Move the ground down 0.05m to ensure that the Y coordinate of the upper edge of the ground is 0
         ground.setMass(MassType.INFINITE);//
 
         world.addBody(ground);
 
-        sidesOfDisplay.add(new Sides(ground,(float) (xMax - xMin),0.1f,sideOfDisplay.BOTTOM));
+        sidesOfDisplay.add(new Sides(ground,fixture));
+//        sidesOfDisplay.add(new Sides(ground,(float) (xMax - xMin),0.1f,sideOfDisplay.BOTTOM));
 
         //top
         ground =new Body();//The same method to create the ground
-        ground.addFixture(new Rectangle((xMax - xMin),0.1));//The ground is a rectangle, 100m wide and 0.1m high
-        ground.getTransform().setTranslation(xMin + (xMax - xMin)/2,yMax);//Move the ground down 0.05m to ensure that the Y coordinate of the upper edge of the ground is 0
+        fixture = new Segment(new Vector2(xMin,yMax), new Vector2(xMax,yMax));
+        ground.addFixture(fixture);//The ground is a rectangle, 100m wide and 0.1m high
+//        ground.getTransform().setTranslation(xMin + (xMax - xMin)/2,yMax);//Move the ground down 0.05m to ensure that the Y coordinate of the upper edge of the ground is 0
         ground.setMass(MassType.INFINITE);//S
 
         world.addBody(ground);
 
-        sidesOfDisplay.add(new Sides(ground,(float) (xMax - xMin),0.1f,sideOfDisplay.TOP));
+        sidesOfDisplay.add(new Sides(ground,fixture));
+//        sidesOfDisplay.add(new Sides(ground,(float) (xMax - xMin),0.1f,sideOfDisplay.TOP));
 
         //start
         ground = new Body();//The same method to create the ground
-        ground.addFixture(new Rectangle(0.1,(yMax - yMin)));//The ground is a rectangle, 100m wide and 0.1m high
-        ground.getTransform().setTranslation(xMin,yMin + (yMax - yMin)/2);//Move the ground down 0.05m to ensure that the Y coordinate of the upper edge of the ground is 0
+        fixture = new Segment(new Vector2(xMin,yMin), new Vector2( xMin,yMax));
+        ground.addFixture(fixture);//The ground is a rectangle, 100m wide and 0.1m high
+//        ground.getTransform().setTranslation(xMin,yMin + (yMax - yMin)/2);//Move the ground down 0.05m to ensure that the Y coordinate of the upper edge of the ground is 0
         ground.setMass(MassType.INFINITE);//S
 
         world.addBody(ground);
 
-        sidesOfDisplay.add(new Sides(ground,0.1f,(float) (yMax - yMin),sideOfDisplay.START));
+        sidesOfDisplay.add(new Sides(ground,fixture));
 
 
         //end
         ground = new Body();//The same method to create the ground
-        ground.addFixture(new Rectangle(0.1,(yMax - yMin)));//The ground is a rectangle, 100m wide and 0.1m high
-        ground.getTransform().setTranslation(xMax,yMin + (yMax - yMin)/2);//Move the ground down 0.05m to ensure that the Y coordinate of the upper edge of the ground is 0
+        fixture = new Segment(new Vector2(xMax,yMin) , new Vector2(xMax,yMax));
+        ground.addFixture(fixture);//The ground is a rectangle, 100m wide and 0.1m high
+//        ground.getTransform().setTranslation(xMax,yMin + (yMax - yMin)/2);//Move the ground down 0.05m to ensure that the Y coordinate of the upper edge of the ground is 0
         ground.setMass(MassType.INFINITE);//S
 
         world.addBody(ground);
 
-        sidesOfDisplay.add(new Sides(ground,0.1f,(float) (yMax - yMin),sideOfDisplay.END));
+        sidesOfDisplay.add(new Sides(ground,fixture));
 
         JButton upBtn = new JButton();
         JButton downBtn = new JButton();
@@ -836,7 +880,8 @@ public class MainClass{
 
 //        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
-
+        frame.pack();
+        frame.setSize(1280,900);
     }
 
 
@@ -1368,27 +1413,27 @@ public class MainClass{
 //                Log.i("PosRect", "xStart = " + body.posStart.x + " yStart = " + body.posStart.y + "xEnd = " + body.posEnd.x + " yEnd = " + body.posEnd.y);
 
 
-                PointF rect = ToDisplayCoords(body.posStart.x,body.posStart.y);
-                PointF endRect = ToDisplayCoords(body.posEnd.x,body.posEnd.y);
+                PointF lineS = ToDisplayCoords(body.line.getPoint1().x,body.line.getPoint1().y);
+                PointF lineE = ToDisplayCoords(body.line.getPoint2().x,body.line.getPoint2().y);
 
 
-                canvas.draw( new Line2D.Double(rect.x,rect.y,endRect.x,endRect.y));
+                canvas.draw( new Line2D.Double(lineS.x,lineS.y,lineE.x,lineE.y));
 
             }
 
             canvas.setPaint(Color.BLUE);
-            Ellipse2D ellipse2D = new Ellipse2D.Double(0,0,500,500);
-//            System.out.println("ElipsePos " + " x = " + ellipse2D.getX() + " y = " + ellipse2D.getY() );
-            canvas.draw(ellipse2D);
+//            Ellipse2D ellipse2D = new Ellipse2D.Double(0,0,500,500);
+////            System.out.println("ElipsePos " + " x = " + ellipse2D.getX() + " y = " + ellipse2D.getY() );
+//            canvas.draw(ellipse2D);
 
             for (Body body : circles){
 
 
                 Ellipse ellipse = (Ellipse) body.getFixture(0).getShape();
 
-                PointF circleStart = ToDisplayCoords(body.getTransform().getTranslationX() - ellipse.getHalfWidth(),body.getTransform().getTranslationY() - ellipse.getHalfHeight());
+                PointF circleStart = ToDisplayCoords(body.getTransform().getTranslationX() - ellipse.getHalfWidth(),body.getTransform().getTranslationY() + ellipse.getHalfHeight());
 
-                PointF circleEnd = ToDisplayCoords(body.getTransform().getTranslationX() + ellipse.getHalfWidth(),body.getTransform().getTranslationY() + ellipse.getHalfHeight());
+//                PointF circleEnd = ToDisplayCoords(body.getTransform().getTranslationX() + ellipse.getHalfWidth(),body.getTransform().getTranslationY() + ellipse.getHalfHeight());
 
                 Ellipse2D ell = new Ellipse2D.Double(circleStart.x,circleStart.y,ellipse.getWidth()*xMult,ellipse.getHeight()*yMult);
                 canvas.draw(ell);
@@ -1428,16 +1473,16 @@ public class MainClass{
         TOP,
         BOTTOM
     }
-    class Sides extends Rect2DMy{
+    class Sides{
+        Body body;
 
-        sideOfDisplay side;
+        Segment line;
 
-        Sides(Body body,float width,float height,sideOfDisplay side){
-            super(body,width,height);
-            this.side = side;
+        Sides(Body body,Convex segment){
+            this.body = body;
+            this.line = (Segment) segment;
         }
 
-        @Override
         void Refresh() {
 
 //            this.body.removeAllFixtures();
@@ -1480,7 +1525,7 @@ public class MainClass{
 //
 //            }
 
-            super.Refresh();
+
         }
     }
 
