@@ -1,10 +1,19 @@
 package com.example.coordinatesystem;
 
 
+
+import org.dyn4j.collision.CollisionItem;
+import org.dyn4j.collision.CollisionPair;
+import org.dyn4j.collision.Fixture;
+import org.dyn4j.collision.broadphase.*;
 import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.geometry.*;
 import org.dyn4j.geometry.Rectangle;
+import org.dyn4j.world.PhysicsWorld;
 import org.dyn4j.world.World;
+import org.dyn4j.world.listener.StepListener;
 
 
 import javax.swing.*;
@@ -13,15 +22,16 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import java.awt.*;
+import java.awt.Shape;
 import java.awt.event.*;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
+import java.awt.geom.*;
 
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.Normalizer;
 import java.util.*;
+import java.util.List;
 
 public class MainClass{
 
@@ -29,7 +39,7 @@ public class MainClass{
     ArrayList<Body> circles = new ArrayList<>();
     ArrayList<Sides> sidesOfDisplay = new ArrayList<>();
     Body graphs;
-    int approximationAccuracy = 20;
+    int approximationAccuracy = 1;
 
 
     JFrame frame;
@@ -58,7 +68,7 @@ public class MainClass{
     double lastYmax;
     double lastYmin;
 
-    Map<String,Double> XYmaxesAndMines = new HashMap<>();
+//    Map<String,Double> XYmaxesAndMines = new HashMap<>();
 
     ArrayList<String> funcsWeDo = new ArrayList<>();
     int funcCount = 0;
@@ -85,6 +95,8 @@ public class MainClass{
 
     int touchCounter = 0;
 
+    boolean isBallPlaceClick = false;
+
 //  Colors
 
     ArrayList<FormulSistem.Pair<Integer,JButton>> colors = new ArrayList<>();
@@ -93,6 +105,9 @@ public class MainClass{
 //    ImageButton currentViewColorChange;
     HashMap<String,Color> colorRGB = new HashMap<>();
     int currentIndexOfChangeColorBtn = 0;
+
+    ArrayList<Link> links = new ArrayList<>();
+
 
 
     static class TouchForMove{
@@ -121,7 +136,7 @@ public class MainClass{
 
     boolean cameraFollowPlayer = false;
 
-    int deltaTime = 1;
+    long deltaTime = 1;
 
 //    ImageButton closeFormInput;
 
@@ -187,10 +202,10 @@ public class MainClass{
 //        formInputContainer.setMinHeight(heightDisp/2);
 
 
-        XYmaxesAndMines.put("xMin",xMin);
-        XYmaxesAndMines.put("xMax",xMax);
-        XYmaxesAndMines.put("yMin",yMin);
-        XYmaxesAndMines.put("yMax",yMax);
+//        XYmaxesAndMines.put("xMin",xMin);
+//        XYmaxesAndMines.put("xMax",xMax);
+//        XYmaxesAndMines.put("yMin",yMin);
+//        XYmaxesAndMines.put("yMax",yMax);
 
 //        Button build = findViewById(R.id.build);
 //        LinearLayout lin = (LinearLayout)findViewById(R.id.formula_inputs_container_container);
@@ -437,6 +452,11 @@ public class MainClass{
             @Override
             public void mousePressed(MouseEvent e) {
 
+                if (isBallPlaceClick){
+                    ball.getTransform().setTranslation((e.getX() - xCentre)/xMult,-(e.getY() - yCentre)/yMult);
+                    isBallPlaceClick =false;
+                }
+
                 frame.requestFocus();
 
                 touch = new TouchForMove(e.getID(),e.getX(),e.getY(),xMax,yMax,xMin,yMin);
@@ -646,15 +666,51 @@ public class MainClass{
 //        });
 
 
+        deltaTime = 1;
 
         /*------Create a world------*/
         world=new World<Body>();//Create the world
 //        world.setGravity(new Vector2(0,-10));//The acceleration of gravity is set to 10m·s^(-2)
         //The following are two other ways of writing
-        world.setGravity(0,0);
+        world.setGravity(0,-9.8);
         // world.setGravity(Vector2.create(10,-Math.PI/2));
-        world.getSettings().setStepFrequency(0.001);//Set the step frequency, the interval between two calculations is 1 millisecond
+        world.getSettings().setStepFrequency(0.01);//Set the step frequency, the interval between two calculations is 1 millisecond
 //        world.setGravity(0,-1);
+
+
+//        world.addStepListener(new StepListener<Body>() {
+//            @Override
+//            public void begin(TimeStep timeStep, PhysicsWorld<Body, ?> physicsWorld) {
+//
+//            }
+//
+//            @Override
+//            public void updatePerformed(TimeStep timeStep, PhysicsWorld<Body, ?> physicsWorld) {
+//
+//            }
+//
+//            @Override
+//            public void postSolve(TimeStep timeStep, PhysicsWorld<Body, ?> physicsWorld) {
+//
+//            }
+//
+//            @Override
+//            public void end(TimeStep timeStep, PhysicsWorld<Body, ?> physicsWorld) {
+//
+//                System.out.println("fixCount =  " +graphs.getFixtureCount());
+//                System.out.println("inDraw = " + Thread.currentThread().getId());
+////                for (Fixture segment : graphs.getFixtures()){
+////                    Segment s = (Segment) segment.getShape();
+////                    System.out.println( "p1 = " + s.getPoint1() + " p2 = " + s.getPoint2());
+////                }
+//                RefreshDrawParametrs();
+//                if (world.getBroadphaseDetector().isUpdated(graphs)){
+//                }
+////                world.removeBody(graphs);
+////                world.addBody(graphs);
+//
+//            }
+//        });
         /*------Create a world------*/
 
         /*------Create entity------*/
@@ -662,7 +718,7 @@ public class MainClass{
 
         graphs = new Body();
         graphs.setMass(MassType.INFINITE);
-        world.addBody(graphs);
+//        graphs.translate(0,0);
 
 
 
@@ -670,9 +726,9 @@ public class MainClass{
 
             ball=new Body();//Create a container to store the balls
             ball.addFixture(new Ellipse(1,1));//Create a small ball and add it to the container, the width and height are both 0.1m, that is, the radius is 0.05m
-            ball.getTransform().setTranslation(i,i);//Set the Y coordinate of the ball to 10m
+            ball.getTransform().setTranslation(0,10);//Set the Y coordinate of the ball to 10m
             ball.setMass(MassType.NORMAL);//Automatically calculate the mass of the ball
-            ball.setLinearVelocity(new Vector2(1,1));
+            ball.setLinearVelocity(new Vector2(0,0));
 
             world.addBody(ball);
             circles.add(ball);
@@ -732,6 +788,23 @@ public class MainClass{
         JButton downBtn = new JButton();
         JButton rightBtn = new JButton();
         JButton leftBtn = new JButton();
+
+        JButton PlaceMainCircle = new JButton();
+        PlaceMainCircle.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                isBallPlaceClick = !isBallPlaceClick;
+            }
+        });
+
+        rightBox.add(PlaceMainCircle);
+
+        Body ewqeq =new Body();
+        ewqeq.addFixture(new Link(new Vector2(0,0), new Vector2(5,0)));
+        world.addBody(ewqeq);
+        ewqeq =new Body();
+        ewqeq.addFixture(new Link(new Vector2(0,0), new Vector2(5,0)));
+        world.addBody(ewqeq);
 
 
 
@@ -880,21 +953,51 @@ public class MainClass{
 
 //        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
+
+
+
         frame.pack();
         frame.setSize(1280,900);
+        frame.repaint();
     }
+
 
 
     //Один кадр
     void RefreshDrawParametrs(){
 
 
+//        System.out.println("Hello before world");
 
-        try {
-            world.step(1);
-        }catch (Exception e){
-            e.printStackTrace();
+        Body eqfkqo = new Body();
+        eqfkqo.setMass(MassType.INFINITE);
+
+//        graphs.removeAllFixtures();
+        int counter = 0;
+        int counter2 = 0;
+        is2TouchNow = !is2TouchNow;
+        ArrayList<Link> newLinks = links;
+
+        for (Link link : newLinks){
+//            System.out.println(" p1 = " + link.getPoint1() + " p2 = " + link.getPoint2());
+            eqfkqo.addFixture(link);
         }
+
+        world.removeBody(world.getBodyCount() - 2);
+        world.addBody(eqfkqo);
+//
+//        eqfkqo.removeAllFixtures();
+//        eqfkqo.addFixture((new Link(new Vector2(0,0),new Vector2(5,5))));
+//        graphs.getTransform().setTranslation(0,0);
+        System.out.println("fixCount =  " + eqfkqo.getFixtureCount());
+        System.out.println("bodyCount =  " + world.getBodyCount());
+//        world.removeBody(eqfkqo);
+
+//        eqfkqo;
+        world.step(1);
+
+
+//        System.out.println("Hello after world");
 
 //        Log.i("FixtureCount","" + graphs.getFixtureCount());
 
@@ -904,25 +1007,32 @@ public class MainClass{
         funcsWeDo.clear();
         for (int i = 0;i < 1;i++) {
 //            LinearLayout linH = (LinearLayout)lin.getChildAt(i);
-//            EditText FormulaInput = (EditText)linH.getChildAt(0);
+//            EditText FormulaInput = (EditText)linH.getChild   At(0);
             try {
 
 //                Log.i("GetText", ""  + FormulaInput.getText().toString() + " size = " + FormulaInput.getText().toString().length());
+//                System.out.println("Hello before calc");
                 FormulSistem.Calculate(FormulaInput.getText(),0,1,0.2);
+//                System.out.println("Hello after calc");
 
                 funcsWeDo.add(FormulaInput.getText());
 
                 allCalculetblePoints.put(FormulaInput.getText(),null);
 
 //                drawView.paint();
+//                System.out.println("Hello before draw");
 
 
                 drawView.repaint();
+//                System.out.println("Hello after draw");
+
+
             }catch (Exception e){
 
                 System.out.println("ERROROFSEX: " + e.getMessage());
             }
         }
+
 
 
 
@@ -951,7 +1061,7 @@ public class MainClass{
 
     protected FormulSistem.Pair<Double,Double> DrobAndCelayaChast(double d){
 
-        System.out.println("DrobChast" + " = " + d);
+//        System.out.println("DrobChast" + " = " + d);
 
         char[] s = String.valueOf(d).toCharArray();
         String drob = "";
@@ -986,20 +1096,24 @@ public class MainClass{
         }
 
         void moveTo(double x,double y){
-            path.add(new Vector2(x,y));
+            path.add(null);
         }
 
         void lineTo(double x,double y){
-            path.add(null);
+            path.add(new Vector2(x,y));
         }
     }
 
-    ArrayList<Path> FuncPointsCalculate(double xMult,double yMult,double xCentre, double yCentre,double step){
+    ArrayList<Path2D.Double> FuncPointsCalculate(double xMult,double yMult,double xCentre, double yCentre,double step){
+
+        System.out.println("thread in calc = " + Thread.currentThread().getId());
+
         double fromx = xMin;
         double tox = xMax;
         try {
 
-            for (String func : funcsWeDo){
+            for (int i = 0;i < funcsWeDo.size();i++){
+                String func = funcsWeDo.get(i);
 
                 ArrayList<FormulSistem.Pair<Double,Double>> calculetblePoints = allCalculetblePoints.get(func);
 
@@ -1030,9 +1144,15 @@ public class MainClass{
 //                        }
                 }else {
                     calculetblePoints = FormulSistem.Calculate(func, xMin, xMax, step);
-                }
+                   }
+                calculetblePoints = FormulSistem.Calculate(func, xMin, xMax, step);
+
                 allCalculetblePoints.remove(func);
                 allCalculetblePoints.put(func,calculetblePoints);
+                System.out.println("Calculate " + " func = " + func + " xMin = " + xMin
+                        + " xMax = " + xMax + " step = " + step
+                        + " calculetblePoints.size() = " +  allCalculetblePoints.get(func).size());
+
             }
 
         }
@@ -1046,14 +1166,24 @@ public class MainClass{
 //                Log.i("calcPoints","" + p.size());
 //            }
 
-        ArrayList<Path> paths = new ArrayList<>(funcCount);
+        ArrayList<Path2D.Double> paths = new ArrayList<>();
 
 
         int qweoipcj = 0;
-//        graphs.removeAllFixtures();
+        links.clear();
+
         for (int pathCount = 0;pathCount < funcsWeDo.size(); pathCount++){
-            Path path = new Path();
-            ArrayList<FormulSistem.Pair<Double,Double>> calculetblePoints = allCalculetblePoints.get(funcsWeDo.get(pathCount));
+            Path2D.Double path = new Path2D.Double();
+            ArrayList<FormulSistem.Pair<Double,Double>> calculetblePoints = null;
+
+            try {
+                calculetblePoints = allCalculetblePoints.get(funcsWeDo.get(pathCount));
+
+            }catch (Exception e){
+                e.printStackTrace();
+                System.out.println("errorFunc FWDsize = " + funcsWeDo.size() + " pathC = "+ pathCount);
+                continue;
+            }
 
             if (calculetblePoints != null){
 
@@ -1065,6 +1195,7 @@ public class MainClass{
                 for (int i = 0; i < calculetblePoints.size();i++){
 
 
+                    counter++;
 
                     if (calculetblePoints.get(i).element2.isNaN()){qweoipcj = i + 1; continue;}
                     if (calculetblePoints.get(i).element2.isInfinite()){
@@ -1090,16 +1221,18 @@ public class MainClass{
                     if (i <= qweoipcj){path.moveTo(point.x,point.y);}
                     path.lineTo(point.x,point.y);
 
-                    counter++;
 
 
 //                    Доделать надо, чтобы могли быть пробелы
                     if (prevPoint != null && counter >= approximationAccuracy){
                         counter = 0;
 //                        Convex shape = new Segment();
+
 //                        graphs.addFixture();
-//                        graphs.addFixture( new Link(new Vector2(prevPoint.x,prevPoint.y),new Vector2(curPoint.x,curPoint.y)));
-//                        Log.i("linkP","prevX = " + prevPoint.x + " prevY = " + prevPoint.y + " x = " + curPoint.x + " y = " + curPoint.y );
+
+
+                        links.add( new Link(new Vector2(prevPoint.x,prevPoint.y),new Vector2(curPoint.x,curPoint.y)));
+//                        System.out.println("linkP " + "prevX = " + prevPoint.x + " prevY = " + prevPoint.y + " x = " + curPoint.x + " y = " + curPoint.y );
 
                         prevPoint = curPoint;
                     }
@@ -1107,10 +1240,14 @@ public class MainClass{
 
                 }
 
+//                System.out.println("pathCOunt = " + counter + " calc.size = " + calculetblePoints.size());
             }
 
             paths.add(path);
         }
+        System.out.println(" calculetblePoints.size() = " +  allCalculetblePoints.get(funcsWeDo.get(0)).size()
+                + " Thread.activeCount() = " + Thread.activeCount()
+        );
         return paths;
     }
 
@@ -1172,10 +1309,16 @@ public class MainClass{
         @Override
         public void paint(Graphics g) {
             super.paint(g);
+
+
             g.setPaintMode();
 
             // заливка канвы цветом.
             Graphics2D canvas = (Graphics2D) g;
+            canvas.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            canvas.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,RenderingHints.VALUE_STROKE_PURE);
+            canvas.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
+
             g.drawRect(0,0,5,5);
 
 //                    .drawARGB(80, 255, 255, 255);
@@ -1194,7 +1337,7 @@ public class MainClass{
 //            width = getWidth();
 //            height = getHeight();
 
-            System.out.println("funcsweDo  " + funcsWeDo.toString() + " " + funcsWeDo.size());
+//            System.out.println("funcsweDo  " + funcsWeDo.toString() + " " + funcsWeDo.size());
 
             //Пердел увелечения и уменьшения масштаба
             if (xMax - xMin < 0.000001){xMax = lastXmax;xMin = lastXmin;}
@@ -1240,7 +1383,7 @@ public class MainClass{
             }
             Cy = Double.parseDouble(jojo);
 //            Cy = DrobAndCelayaChast(Math.log10(yMax - yMin)).first;
-            System.out.println("Cy" + Cy);
+//            System.out.println("Cy" + Cy);
 
             //Центры координатных осей относительно сторон экрана
             xCentre = ( - xMin/(xMax - xMin))*width;
@@ -1283,8 +1426,8 @@ public class MainClass{
             int decimalPlacesY = DecimalPlaces(Cy);
 
             System.out.println("Decmalplases" + decimalPlacesX + " " + decimalPlacesY);
-            System.out.println("VspomogatZnach" + "[" +Cex + ',' + Cey + ']' + '+' + '[' + xCentre + ',' + yCentre + ']' );
-            System.out.println("assHole" + "[xMax " + xMax + "|xMin " + xMin + "|yMax " + yMax + "|yMin " + yMin + ']');
+//            System.out.println("VspomogatZnach" + "[" +Cex + ',' + Cey + ']' + '+' + '[' + xCentre + ',' + yCentre + ']' );
+//            System.out.println("assHole" + "[xMax " + xMax + "|xMin " + xMin + "|yMax " + yMax + "|yMin " + yMin + ']');
 
 
 //          Создание коорд сетки
@@ -1370,8 +1513,9 @@ public class MainClass{
 
             //Строиться с точностью до 0.005*ЦенаДеления
             step = 0.005*Cx;
+            System.out.println("thread in actually draw = " + Thread.currentThread().getId());
 
-            ArrayList<Path> paths = FuncPointsCalculate(xMult,yMult,xCentre,yCentre,step);
+            ArrayList<Path2D.Double> paths = FuncPointsCalculate(xMult,yMult,xCentre,yCentre,step);
 
 
 //            Log.i("CenaDel","[Cx " + Cx + "|Cy " + Cy + "|Cex " + Cex + "|Cey " + Cey + ']');
@@ -1381,23 +1525,52 @@ public class MainClass{
 //            p.setStyle(Paint.Style.STROKE);
 
             int indexChisto = 0;
-            for (Path path : paths){
-//                p.setColor(colors.get(indexChisto++).element1);
+//            Stroke stroke = new BasicStroke(2,BasicStroke.CAP_SQUARE,BasicStroke.JOIN_BEVEL);
+//            canvas.setStroke(stroke);
+            System.out.println("WeDrawNow");
+            for (Path2D.Double path : paths){
+                System.out.println( "Thread.activeCount() = " + Thread.activeCount() +
+                        "pathLengt = " + paths.size() +
+                        " funcsWeDo.get(0) = " + funcsWeDo.get(0) +
+                        " allCalculetblePoints.size() = " + allCalculetblePoints.size()
+                        + "  allCalculetblePoints.keySet() = " +  allCalculetblePoints.keySet()
+
+                );
+
+                System.out.println("CaclSizeWhenDraw  = " + allCalculetblePoints.get( funcsWeDo.get(0)).size());
+
+                //                p.setColor(colors.get(indexChisto++).element1);
 //                Log.i("Nigga","" +colors.get(indexChisto - 1).first + "Jopa = " + colors.get(indexChisto - 1).second.getDrawingCacheBackgroundColor());
 
-                Vector2 prevpoint = null;
+//                Vector2 prevpoint = null;
                 canvas.setPaint(Color.BLUE);
-                for (Vector2 point : path.path){
+                canvas.draw(path);
 
-
-//                    if (path.path.indexOf(point) == 0){prevpoint = point; continue;}
-
-                    if (prevpoint != null && point != null){
-                        canvas.draw(new Line2D.Double(prevpoint.x,prevpoint.y,point.x,point.y));
-                    }
-
-                    prevpoint = point;
-                }
+////                canvas.setStroke();
+//                boolean isFirst = true;
+//
+//                Path2D.Double path1 = new Path2D.Double();
+//                for (Vector2 point : path.path){
+//
+//
+//
+//
+////                    if (path.path.indexOf(point) == 0){prevpoint = point; continue;}
+////                    System.out.println("PathDraw, " + " prevpoint.x = " + prevpoint.x
+////                            + " prevpoint.y = " + prevpoint.y + " point.x = " + point.x + " point.y = " + point.y );
+//
+//                    if (point != null){
+//
+//                        if (isFirst){
+//                            path1.moveTo(point.x,point.y);
+//                        }
+//                        isFirst = false;
+//
+//                        path1.lineTo(point.x,point.y);
+//                    }
+//
+//                    prevpoint = point;
+//                }
 
             }
             p.setColor(Color.RED);
@@ -1552,14 +1725,40 @@ public class MainClass{
 
     public static void main(String[] args) {
         MainClass good = new MainClass();
+
+        long totalTime = 0;
+
         good.onCreate();
         while (true){
+
             try {
-                Thread.sleep(1);
+
+                long startTime = System.nanoTime();
+
+                long time;
+
+//                System.out.println(time);
+
                 good.RefreshDrawParametrs();
+
+
+                long endTime   = System.nanoTime();
+                totalTime = endTime - startTime;
+
+                if (totalTime/1000000 >= 10){time = 0;}
+                else {time = 10 - totalTime/1000000;}
+
+                if (totalTime/1000000 >= 10){
+                    System.out.println("TIME = " + totalTime/1000000 + " : " + totalTime/1000 + " : " + totalTime);
+                }
+                System.out.println("inMain = " + Thread.currentThread().getId());
+
+                Thread.sleep(time);
+
             }catch (Exception e){
                 e.printStackTrace();
             }
+
         }
 
 //        JFrame frame = new JFrame();

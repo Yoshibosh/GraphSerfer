@@ -28,7 +28,12 @@ jar {
     manifest {
         attributes 'Main-Class': 'com.example.coordinatesystem.MainClass'
     }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
 }
+
 
 
 
